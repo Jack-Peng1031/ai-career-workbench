@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI 职业生涯规划学习实践工作台 · 2026-09-30</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E"><style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#14161a; --muted:#6b7280; --line:#e3e6ea;
+  --gpa:#2f6feb; --code:#12a150; --english:#d29922; --research:#8250df;
+  --class:#5b6472; --phase:#e5484d; --extra:#0d9488; --custom:#e36209;
+  --ok:#12a150; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0f1115; --panel:#171a1f; --ink:#e8eaed; --muted:#9aa2ad; --line:#272b32;
+         --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 18px rgba(0,0,0,.35); }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Inter","Segoe UI",system-ui,-apple-system,"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+  font-size:14.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--gpa);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+header.hero{background:linear-gradient(135deg,#1f3a8a,#2f6feb 55%,#12a150);
+  color:#fff;border-radius:16px;padding:24px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+header.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%)}
+.hero h1{margin:0 0 4px;font-size:22px;letter-spacing:.3px}
+.hero .sub{opacity:.92;font-size:13.5px}
+.hero-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between;margin-top:16px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;max-width:640px}
+.pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  padding:4px 11px;border-radius:999px;font-size:12.5px}
+.ring{--p:0;width:96px;height:96px;flex:0 0 auto}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .bg{stroke:rgba(255,255,255,.25)}
+.ring .fg{stroke:#fff;stroke-dasharray:264;stroke-dashoffset:calc(264 - 264*var(--p)/100);
+  transition:stroke-dashoffset .5s ease;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring text{fill:#fff;font-size:19px;font-weight:700;text-anchor:middle}
+.ring .lab{font-size:10px;font-weight:500;opacity:.85}
+.grid{display:grid;gap:16px;margin-top:16px}
+@media(min-width:980px){ .cols{grid-template-columns:1fr 340px} }
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:15.5px;letter-spacing:.2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--bg);
+  border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+.card .hint{color:var(--muted);font-size:12.5px;margin:0 0 14px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{font-weight:600}
+ul.tasks{list-style:none;margin:0;padding:0}
+li.task{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+li.task:first-child{border-top:0}
+.bar{flex:0 0 4px;border-radius:3px;background:var(--gpa)}
+.track-gpa .bar{background:var(--gpa)} .track-code .bar{background:var(--code)}
+.track-english .bar{background:var(--english)} .track-research .bar{background:var(--research)}
+.track-class .bar{background:var(--class)} .track-phase .bar{background:var(--phase)}
+.track-extra .bar{background:var(--extra)}
+.track-custom .bar{background:var(--custom)}
+.ctform{display:grid;gap:8px;margin:4px 0 2px}
+.ctform label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+.ctform input[type=text],.ctform input[type=date],.ctform input[type=number],.ctform textarea{
+  width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel);color:var(--ink);font:inherit;font-size:12.5px}
+.ctform textarea{resize:vertical;min-height:38px}
+.ctform .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ctform .row3{display:grid;grid-template-columns:1fr 1fr 92px;gap:8px}
+.ctform .wd{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--ink)}
+.ctform .wd label{display:inline-flex;align-items:center;gap:3px;color:var(--ink);margin:0}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;
+  padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.btn.primary{background:var(--gpa);border-color:var(--gpa);color:#fff;font-weight:600}
+.btn:hover{filter:brightness(1.04)}
+.btn.mini{padding:2px 8px;font-size:11.5px}
+.warn{margin-top:8px;padding:7px 9px;border-radius:7px;background:#fff4e5;border:1px solid #f0c48a;
+  color:#7a4700;font-size:12px}
+.warn[hidden]{display:none}
+.ctlist{list-style:none;margin:8px 0 0;padding:0}
+.ctlist li{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:12.5px}
+.ctlist .t{flex:1;min-width:0}
+.ctlist .m{color:var(--muted);font-size:11.5px}
+.ct-empty{color:var(--muted);font-size:12.5px;margin-top:6px}
+ul.tl{list-style:none;margin:4px 0 0;padding:0}
+ul.tl li.tl-hidden{display:none}
+ul.tl.tl-expanded li.tl-hidden{display:block}
+ul.tl li.tl-date{border-top:1px solid var(--line)}
+ul.tl > li.tl-date:first-child{border-top:0}
+ul.tl summary.tl-head{display:grid;grid-template-columns:10px 46px 34px 1fr auto;gap:8px;
+  align-items:center;padding:9px 2px;cursor:pointer;list-style:none;font-size:13px}
+ul.tl summary.tl-head::-webkit-details-marker{display:none}
+ul.tl summary.tl-head::marker{content:""}
+ul.tl .dot{width:8px;height:8px;border-radius:99px;background:var(--muted);opacity:.55}
+ul.tl details[open] > summary.tl-head .dot{background:var(--gpa);opacity:1}
+ul.tl .tld{font-variant-numeric:tabular-nums;font-weight:700}
+ul.tl .tlw{color:var(--muted)}
+/* 相对天数与条数放在此行右端，不挤占标题宽度 */
+ul.tl .tlmeta{text-align:right;color:var(--muted);font-size:11.5px;white-space:nowrap}
+ul.tl .tlmeta b{color:var(--ink);font-weight:600}
+ul.tl .tltoday{color:var(--gpa);font-weight:700}
+/* 展开后的任务：标题占满整行、需要时换行，不再被省略号截断 */
+ul.tl ul.tl-items{list-style:none;margin:0 0 8px;padding:0}
+ul.tl ul.tl-items li{display:flex;gap:8px;align-items:flex-start;padding:5px 2px 5px 18px;font-size:12.6px}
+ul.tl ul.tl-items li .ti{flex:1;min-width:0;overflow-wrap:anywhere;line-height:1.55}
+ul.tl ul.tl-items li .tag{flex:0 0 auto;margin-top:1px}
+ul.tl ul.tl-items li.hit .ti{font-weight:600;color:var(--gpa)}
+ul.tl ul.tl-items .ti .sub{display:block;color:var(--muted);font-weight:400;font-size:12.1px;margin-top:2px}
+.tl-more{color:var(--muted);font-size:12.5px;cursor:pointer;padding:6px 0;user-select:none}
+.tl-more:hover{color:var(--gpa)}
+.tmain{flex:1;min-width:0}
+.ttop{display:flex;align-items:flex-start;gap:9px}
+.ttitle{font-weight:600;font-size:14px}
+.min{color:var(--muted);font-size:12px;margin-left:auto;white-space:nowrap;padding-top:2px}
+ol.steps{margin:6px 0 0;padding-left:20px;color:var(--muted);font-size:12.8px}
+ol.steps li{margin:2px 0}
+.proof{margin-top:7px;font-size:12.4px;color:#0b7a3c;background:rgba(18,161,80,.09);
+  border-left:3px solid var(--code);padding:5px 9px;border-radius:0 6px 6px 0}
+.note{font-size:12.2px;color:var(--muted);margin-top:5px;font-style:italic}
+.check{appearance:none;width:19px;height:19px;margin-top:2px;border:2px solid var(--line);
+  border-radius:6px;cursor:pointer;flex:0 0 auto;position:relative;background:transparent}
+.check:checked{background:var(--ok);border-color:var(--ok)}
+.check:checked:after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(43deg)}
+li.done .ttitle{text-decoration:line-through;color:var(--muted)}
+li.done .proof,li.done ol.steps{opacity:.5}
+.prog{margin:13px 0}
+.prog .lab{display:flex;justify-content:space-between;font-size:12.8px;margin-bottom:5px;gap:8px}
+.prog .lab .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prog .lab .v{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.track{height:7px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.track i{display:block;height:100%;border-radius:99px}
+.bg-gpa{background:var(--gpa)} .bg-code{background:var(--code)}
+.bg-english{background:var(--english)} .bg-research{background:var(--research)}
+.dates{list-style:none;margin:0;padding:0}
+.dates li{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.dates li:last-child{border-bottom:0}
+.dates .d{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;flex:0 0 76px;font-size:12.5px}
+.dates .k{font-size:10.5px;padding:1px 6px;border-radius:5px;background:var(--bg);border:1px solid var(--line);
+  color:var(--muted);flex:0 0 auto;margin-top:3px;height:18px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.day{border:1px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;background:var(--panel)}
+.day.today{border-color:var(--gpa);box-shadow:0 0 0 2px rgba(47,111,235,.18)}
+.day .dn{font-size:11px;color:var(--muted)}
+.day .dd{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.day .dc{font-size:10.5px;color:var(--muted);margin-top:4px;min-height:14px}
+.day .pbar{height:5px;background:var(--bg);border-radius:99px;margin-top:7px;overflow:hidden}
+.day .pbar i{display:block;height:100%;background:var(--ok)}
+table.simple{width:100%;border-collapse:collapse;font-size:12.5px}
+table.simple th,table.simple td{text-align:left;padding:6px 7px;border-bottom:1px solid var(--line)}
+table.simple th{color:var(--muted);font-weight:600;font-size:11.5px}
+table.simple td.n{font-variant-numeric:tabular-nums;text-align:right}
+footer{margin-top:26px;color:var(--muted);font-size:12px;text-align:center;line-height:1.9}
+.cmd{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1px 6px;
+  font-family:ui-monospace,Consolas,"Cascadia Mono",monospace;font-size:12px}
+</style></head><body data-today="2026-09-30"><div class="wrap"><header class="hero"><h1>AI 职业生涯规划 · 学习实践工作台</h1><div class="sub">四川大学 · 人工智能 · 2026级　｜　目标：保研优先 / 考研兜底 双轨</div><div class="hero-row"><div class="pills"><span class="pill">今天 2026-09-30 周三</span><span class="pill">第 5 教学周</span><span class="pill">本学期 13 门课 · 24 学分</span><span class="pill">今日自主任务 6/6 项</span><span class="pill">计划投入 180 分钟</span></div><svg class="ring" viewBox="0 0 96 96" style="--p:100.0"><circle class="bg" cx="48" cy="48" r="42"/><circle class="fg" cx="48" cy="48" r="42"/><text x="48" y="50">100%</text><text class="lab" x="48" y="64">今日完成</text></svg></div></header><div class="grid cols"><div class="grid" style="margin:0"><section class="card" id="today"><h2>今日清单 <span class="tag">2026-09-30 周三 · 第 5 教学周</span></h2><p class="hint">3 门课 · 自主任务 <b id="kpi-done">6</b>/6 项 · 计划投入 180 分钟。勾选后会立即存档到 <span class="cmd">state/completions.json</span>。</p><ul class="tasks"><li class="task track-class" data-key="2026-09-30::class-105799020-1-2节"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::class-105799020-1-2节" title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">1. 通用英语Ⅰ-1（1-2节）</span><span class="min">课程</span></div><ol class="steps"><li>地点：江安/二基楼 B座 B420　教师：潘静文</li></ol></div></li><li class="task track-class" data-key="2026-09-30::class-888004010A05-5-6节"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::class-888004010A05-5-6节" title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">2. 体育-1（羽毛球）（5-6节）</span><span class="min">课程</span></div><ol class="steps"><li>地点：江安/体育场馆　教师：潘峰</li></ol></div></li><li class="task track-class" data-key="2026-09-30::class-900004020-8-9节"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::class-900004020-8-9节" title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">3. 军事理论（8-9节）</span><span class="min">课程</span></div><ol class="steps"><li>地点：江安/一教D D503　教师：王建容</li></ol></div></li><li class="task track-english done" data-key="2026-09-30::vocab-cet4"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::vocab-cet4" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">4. CET-4 词汇 50 词（背新词+复习昨日）</span><span class="min">25 分钟</span></div><ol class="steps"><li>用 App 过 50 个新词，只求认得、不求拼写全对</li><li>用 10 分钟回滚昨天与三天前的词表（艾宾浩斯第1/3天）</li><li>把今天连续错的 5 个词抄进 `records/english/生词本.md`</li></ol><div class="proof">完成标准：生词本当天新增 ≥5 条</div><div class="note">提示：考试当天为节点；没时间时至少做复习那一步（10分钟）</div></div></li><li class="task track-code done" data-key="2026-09-30::leetcode"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::leetcode" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">5. LeetCode 刷题</span><span class="min">45 分钟</span></div><ol class="steps"><li>按当前周计划刷当周专题（数组/字符串 → 双指针 → 二分 → 递归回溯 → 基础DP）</li><li>每题先自己写 15 分钟，卡住再看题解，看完必须关掉题解重写一遍</li><li>写完记录：题目、难度、卡点、复杂度分析</li></ol><div class="proof">完成标准：`records/code/刷题日志.md` 增加当日条目，题量字段填写真实完成数</div><div class="note">提示：90天100题：平时1-2题，周末补到3-4题。首月只做 Easy/入门 Medium</div></div></li><li class="task track-code done" data-key="2026-09-30::github-commit"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::github-commit" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">6. GitHub 仓库提交（代码/笔记都算）</span><span class="min">10 分钟</span></div><ol class="steps"><li>把当天的代码或笔记整理进仓库</li><li>写一条有信息量的 commit message（做了什么、为什么）</li><li>push 后确认主页贡献格变绿</li></ol><div class="proof">完成标准：GitHub 主页当天出现绿色格子</div><div class="note">提示：目标是简历上有一条连续的贡献曲线，不是刷绿格子</div></div></li><li class="task track-gpa done" data-key="2026-09-30::calculus-drill"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::calculus-drill" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">7. 微积分（Ⅰ）-1 计算训练</span><span class="min">40 分钟</span></div><ol class="steps"><li>复习当天课堂内容，把课本例题合上重做一遍</li><li>做 5-8 道课后题，重点练极限/导数/中值定理这类高频题型</li><li>每周至少 2 次把关键定理用自己的话讲一遍（能讲清才算会）</li></ol><div class="proof">完成标准：演算纸或错题本上留下当天痕迹；错题标注错误原因</div><div class="note">提示：权重最高的一门课，保研排名的主要分水岭</div></div></li><li class="task track-gpa done" data-key="2026-09-30::course-review"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::course-review" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">8. 当日课堂复盘（每门课 10 分钟）</span><span class="min">30 分钟</span></div><ol class="steps"><li>打开今天的课表，逐门回忆：这节课讲了什么？考点在哪？</li><li>把没听懂的点写成问题清单，第二天课间问老师或同学</li><li>作业当天或次日完成，不拖到截止前</li><li>重点盯：通用英语Ⅰ-1、科技哲学史、国家安全教育、军事理论、大学生心理健康</li></ol><div class="proof">完成标准：问题清单里每个问题都有后续处理结果</div></div></li><li class="task track-custom done" data-key="2026-09-30::custom-c4ba71cf0"><span class="bar"></span><input class="check" type="checkbox" data-key="2026-09-30::custom-c4ba71cf0" checked title="勾选即确认完成"><div class="tmain"><div class="ttop"><span class="ttitle">9. 整理计划</span><span class="min">30 分钟</span></div></div></li></ul></section><section class="card"><h2>本周全景 <span class="tag">2026-09-28 起</span></h2><p class="hint">柱条是该日自主任务的完成比例；改完计划后运行 <span class="cmd">python app.py replan</span> 重算。</p><div class="week"><div class="day"><div class="dn">周一</div><div class="dd">28</div><div class="dc">1 课 · 7 任务</div><div class="pbar"><i style="width:0%"></i></div></div><div class="day"><div class="dn">周二</div><div class="dd">29</div><div class="dc">2 课 · 6 任务</div><div class="pbar"><i style="width:0%"></i></div></div><div class="day today"><div class="dn">周三</div><div class="dd">30</div><div class="dc">3 课 · 6 任务</div><div class="pbar"><i style="width:100%"></i></div></div><div class="day"><div class="dn">周四</div><div class="dd">1</div><div class="dc">3 课 · 3 任务</div><div class="pbar"><i style="width:0%"></i></div></div><div class="day"><div class="dn">周五</div><div class="dd">2</div><div class="dc">1 课 · 3 任务</div><div class="pbar"><i style="width:0%"></i></div></div><div class="day"><div class="dn">周六</div><div class="dd">3</div><div class="dc">0 课 · 5 任务</div><div class="pbar"><i style="width:0%"></i></div></div><div class="day"><div class="dn">周日</div><div class="dd">4</div><div class="dc">0 课 · 4 任务</div><div class="pbar"><i style="width:0%"></i></div></div></div></section><section class="card"><h2>阶段里程碑</h2><p class="hint">一个月 / 90 天 / 一年三道关，逐条打勾；不达标就当场调计划。</p><div style="margin-bottom:14px"><div style="font-weight:600;font-size:13.5px">第 1 个月：把习惯与工具链立起来 <span class="tag" style="font-weight:500">截止 2026-10-30（30 天后）</span></div><ol class="steps"><li>微积分每天有演算痕迹，累计 ≥20 天</li><li>LeetCode 累计 ≥30 题，刷题日志每天有记录</li><li>词汇累计 ≥22 天，四级核心词过完第一遍</li><li>GitHub 仓库建好并有 ≥12 次提交</li><li>AI编程基础-1 课后代码全部自己重敲过一遍</li><li>查清保研细则并存档（绩点算法、加分项、名额）</li></ol></div><div style="margin-bottom:14px"><div style="font-weight:600;font-size:13.5px">90 天：期末不塌方 + 四级过关 + 100 题 <span class="tag" style="font-weight:500">截止 2026-12-29（90 天后）</span></div><ol class="steps"><li>期末：微积分、AI编程基础、AI编程基础实训全部 ≥85 分（目标专业前30%）</li><li>CET-4 首考参加，目标 550+</li><li>LeetCode 累计 ≥100 题</li><li>完成蓝桥杯省赛报名</li><li>所有通识/思政课无缺勤、无挂科风险</li><li>python 数据栈入门完成 Numpy+Pandas 基础</li></ol></div><div style="margin-bottom:14px"><div style="font-weight:600;font-size:13.5px">一年：大一学年收官，进入大二竞赛与科研 <span class="tag" style="font-weight:500">截止 2027-07-01（274 天后）</span></div><ol class="steps"><li>大一学年绩点进入专业前 30%</li><li>第16届/第17届蓝桥杯省赛拿到省三及以上</li><li>LeetCode 累计 ≥300 题，会写常见模板</li><li>CET-6 启动（或四级 550+ 已达成）</li><li>进入 1 个课题组旁听组会，或完成 1 次大创立项调研</li><li>确定主攻方向种子：CV / NLP / 大模型 / 数据挖掘 四选一</li><li>读完 1 本 Python 数据分析入门书并有配套代码仓库</li></ol></div></section></div><div class="grid" style="margin:0"><section class="card"><h2>区间完成率</h2><p class="hint">只统计自主任务（课程不计入）。</p><div class="kv"><span>近 30 天</span><b>6/200　3%</b></div><div class="kv"><span>近 90 天</span><b>6/207　3%</b></div><div class="kv"><span>近一年</span><b>6/207　3%</b></div></section><section class="card"><h2>累计进度</h2><p class="hint">刷题量、模考次数等按你填写的真实数量累加（<span class="cmd">app.py done leetcode --amount 3</span>）。</p><div class="prog"><div class="lab"><span class="l">CET-4 词汇 50 词（背新词+复习昨日）</span><span class="v">1/30 天 · 2026-12-12前</span></div><div class="track"><i class="bg-english" style="width:3.3%"></i></div></div><div class="prog"><div class="lab"><span class="l">英语精读/听力 1 个单元</span><span class="v">0/18 天 · 2026-12-12前</span></div><div class="track"><i class="bg-english" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">CET-4 全真模考（限时 125 分钟）</span><span class="v">0/10 次 · 2026-12-12前</span></div><div class="track"><i class="bg-english" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">LeetCode 刷题</span><span class="v">1/100 题 · 2026-12-26前</span></div><div class="track"><i class="bg-code" style="width:1.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">AI编程基础-1 课后代码实操</span><span class="v">0/28 次 · 2027-01-11前</span></div><div class="track"><i class="bg-code" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">GitHub 仓库提交（代码/笔记都算）</span><span class="v">1/40 天 · 2027-01-11前</span></div><div class="track"><i class="bg-code" style="width:2.5%"></i></div></div><div class="prog"><div class="lab"><span class="l">蓝桥杯备赛专项（按专题推进）</span><span class="v">0/12 次 · 2027-04-10前</span></div><div class="track"><i class="bg-code" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">微积分（Ⅰ）-1 计算训练</span><span class="v">1/60 天 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:1.7%"></i></div></div><div class="prog"><div class="lab"><span class="l">当日课堂复盘（每门课 10 分钟）</span><span class="v">1/60 天 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:1.7%"></i></div></div><div class="prog"><div class="lab"><span class="l">思政/通识课知识点卡片</span><span class="v">0/28 次 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">周复盘（30 分钟）</span><span class="v">0/14 次 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">信息侦察一小步</span><span class="v">0/24 次 · 2027-01-11前</span></div><div class="track"><i class="bg-research" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">Python 数据栈入门（Numpy/Pandas）</span><span class="v">0/14 次 · 2027-02-28前</span></div><div class="track"><i class="bg-research" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">实验室/组会观察</span><span class="v">0/14 次 · 2027-01-11前</span></div><div class="track"><i class="bg-research" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">前沿阅读（科普级，别硬啃论文）</span><span class="v">0/14 次 · 2027-01-11前</span></div><div class="track"><i class="bg-research" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">校园跑 20 分钟（周六）</span><span class="v">0/30 次 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">校园跑 20 分钟（周日）</span><span class="v">0/30 次 · 2027-01-11前</span></div><div class="track"><i class="bg-gpa" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">英语慕课网作业 40 分钟（周六）</span><span class="v">0/30 次 · 2027-01-11前</span></div><div class="track"><i class="bg-english" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">英语慕课网作业 40 分钟（周日）</span><span class="v">0/30 次 · 2027-01-11前</span></div><div class="track"><i class="bg-english" style="width:0.0%"></i></div></div><div class="prog"><div class="lab"><span class="l">英语学习通作业 40 分钟（周一）</span><span class="v">0/30 次 · 2027-01-11前</span></div><div class="track"><i class="bg-english" style="width:0.0%"></i></div></div></section><section class="card"><h2>接下来要盯的日期<span class="tag">点日期展开 · 共 24 天</span></h2><div class="tl-more" id="tl-toggle" onclick="toggleAllTimeline()">展开/收起全部日期</div><ul class="tl" id="tl-list"><li><details class="tl-date" data-idx="0" open><summary class="tl-head"><span class="dot"></span><span class="tld">09-30</span><span class="tlw">周三</span><span class="tlmeta"><span class="tltoday">今天</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">自定义</span><span class="ti">整理计划<span class="sub">区间 2026-09-30　30 分钟</span></span></li></ul></details></li><li><details class="tl-date" data-idx="1" open><summary class="tl-head"><span class="dot"></span><span class="tld">10-01</span><span class="tlw">周四</span><span class="tlmeta"><span>明天</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">holiday</span><span class="ti">国庆假期（10/1-10/7，第5-6教学周）<span class="sub">只保留单词+刷题各1个最小单元，其余任务自动顺延</span></span></li></ul></details></li><li><details class="tl-date" data-idx="2"><summary class="tl-head"><span class="dot"></span><span class="tld">10-09</span><span class="tlw">周五</span><span class="tlmeta"><span>9 天后</span>　<b>2</b> 项</span></summary><ul class="tl-items"><li><span class="tag">academic</span><span class="ti">国家安全教育 第1次课（全学期只有第6、10周两次）<span class="sub">这门前两次缺一次就缺一半，务必到课</span></span></li><li><span class="tag">lecture</span><span class="ti">教授开放日 · 蒲亦非（分数阶信号处理）第6周 7-9节<span class="sub">见当天 fixed_events 任务；回来写 3 个名词</span></span></li></ul></details></li><li><details class="tl-date" data-idx="3"><summary class="tl-head"><span class="dot"></span><span class="tld">10-12</span><span class="tlw">周一</span><span class="tlmeta"><span>12 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 雷印杰（计算机视觉/多模态）第7周 1-2节<span class="sub">见当天 fixed_events 任务</span></span></li></ul></details></li><li><details class="tl-date" data-idx="4"><summary class="tl-head"><span class="dot"></span><span class="tld">10-19</span><span class="tlw">周一</span><span class="tlmeta"><span>19 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 王利团（高效机器学习/医学图像）第8周 1-2节<span class="sub">见当天 fixed_events 任务</span></span></li></ul></details></li><li><details class="tl-date" data-idx="5"><summary class="tl-head"><span class="dot"></span><span class="tld">10-29</span><span class="tlw">周四</span><span class="tlmeta"><span>29 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 郑远航（智能决策/智能医学）第9周 3-4节<span class="sub">见当天 fixed_events 任务</span></span></li></ul></details></li><li><details class="tl-date" data-idx="6"><summary class="tl-head"><span class="dot"></span><span class="tld">11-02</span><span class="tlw">周一</span><span class="tlmeta"><span>33 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 王炎（医学图像/基础模型）第10周 3-4节（与科技哲学史冲突）<span class="sub">与科技哲学史完全重合，需取舍</span></span></li></ul></details></li><li><details class="tl-date" data-idx="7"><summary class="tl-head"><span class="dot"></span><span class="tld">11-06</span><span class="tlw">周五</span><span class="tlmeta"><span>37 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">academic</span><span class="ti">国家安全教育 第2次课<span class="sub">同上，结束时确认考核方式与平时分构成</span></span></li></ul></details></li><li><details class="tl-date" data-idx="8"><summary class="tl-head"><span class="dot"></span><span class="tld">11-10</span><span class="tlw">周二</span><span class="tlmeta"><span>41 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 陈学勤（社会计算/智能体）第11周 8-9节<span class="sub">见当天 fixed_events 任务</span></span></li></ul></details></li><li><details class="tl-date" data-idx="9"><summary class="tl-head"><span class="dot"></span><span class="tld">11-11</span><span class="tlw">周三</span><span class="tlmeta"><span>42 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">academic</span><span class="ti">大学生心理健康 开课（第11周起）<span class="sub">考查课，出勤即主要得分项</span></span></li></ul></details></li><li><details class="tl-date" data-idx="10"><summary class="tl-head"><span class="dot"></span><span class="tld">11-16</span><span class="tlw">周一</span><span class="tlmeta"><span>47 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 袁钟（不确定性建模/自监督）第12周 1-2节<span class="sub">见当天 fixed_events 任务</span></span></li></ul></details></li><li><details class="tl-date" data-idx="11"><summary class="tl-head"><span class="dot"></span><span class="tld">11-24</span><span class="tlw">周二</span><span class="tlmeta"><span>55 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 周尧（神经网络/进化计算）第13周 8-9节<span class="sub">AI编程基础任课老师，最自然的进组试探场合</span></span></li></ul></details></li><li class="tl-hidden"><details class="tl-date" data-idx="12"><summary class="tl-head"><span class="dot"></span><span class="tld">11-28</span><span class="tlw">周六</span><span class="tlmeta"><span>59 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">academic</span><span class="ti">校历第13教学周 · 期中教学检查周<span class="sub">核对各科平时分与作业完成情况</span></span></li></ul></details></li><li class="tl-hidden"><details class="tl-date" data-idx="13"><summary class="tl-head"><span class="dot"></span><span class="tld">11-30</span><span class="tlw">周一</span><span class="tlmeta"><span>61 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 王建勇（神经网络/智能医学）第14周 3-4节（与科技哲学史冲突）<span class="sub">与科技哲学史重合，需取舍</span></span></li></ul></details></li><li class="tl-hidden"><details class="tl-date" data-idx="14"><summary class="tl-head"><span class="dot"></span><span class="tld">12-09</span><span class="tlw">周三</span><span class="tlmeta"><span>70 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">lecture</span><span class="ti">教授开放日 · 贺喆南（计算智能/智能优化）第15周 3-4节<span class="sub">当天 3-4 节本就空着，零成本</span></span></li></ul></details></li><li class="tl-hidden"><details class="tl-date" data-idx="15"><summary class="tl-head"><span class="dot"></span><span class="tld">12-12</span><span class="tlw">周六</span><span class="tlmeta"><span>73 天后</span>　<b>1</b> 项</span></summary><ul class="tl-items"><li><span class="tag">exam</span><span class="ti">CET-4 笔试（预估，以教务处通知为准）<span class="sub">最后一次全真模考，考前一周只做真题</span></span></li></ul></details></li></ul></section><section class="card" id="custom"><h2>自定义任务<span class="tag">某一天 / 一个时间段</span></h2><p class="hint">添加后会出现在对应日期的<b>今日清单</b>里（可勾选），并进入右侧<b>接下来要盯的日期</b>时间线。留空结束日期＝只有一天；勾选星期＝该时间段内只在这些天出现（例如只勾周六周日）。</p><form class="ctform" id="ct-form"><div><label>任务名（必填）</label><input type="text" id="ct-title" placeholder="例如：交英语慕课作业 / 校园跑 20 分钟"></div><div class="row3"><div><label>开始日期</label><input type="date" id="ct-from" value="2026-09-30"></div><div><label>结束日期（可留空）</label><input type="date" id="ct-to"></div><div><label>分钟</label><input type="number" id="ct-min" value="30" min="0" step="5"></div></div><div><label>限定星期（不选＝每天）</label><div class="wd"><label><input type="checkbox" class="wdbox" value="1">周一</label><label><input type="checkbox" class="wdbox" value="2">周二</label><label><input type="checkbox" class="wdbox" value="3">周三</label><label><input type="checkbox" class="wdbox" value="4">周四</label><label><input type="checkbox" class="wdbox" value="5">周五</label><label><input type="checkbox" class="wdbox" value="6">周六</label><label><input type="checkbox" class="wdbox" value="7">周日</label></div></div><div><label>步骤（每行一条，可选）</label><textarea id="ct-steps"></textarea></div><div><label>完成标准（可选）</label><input type="text" id="ct-proof" placeholder="例如：学习通无待交标记"></div><div><button class="btn primary" type="submit">添加任务</button></div></form><div class="warn" id="ct-warn" hidden></div><ul class="ctlist"><li><span class="t"><b>整理计划</b><br><span class="m">2026-09-30　30 分钟</span></span><button class="btn mini" onclick="removeCustom('c4ba71cf0')">删除</button></li></ul></section><section class="card"><h2>本学期课表</h2><table class="simple"><tr><th>星期</th><th>节次</th><th>课程</th><th>教师</th><th>周次</th><th>地点</th></tr><tr><td>周三</td><td>5-6节</td><td>体育-1（羽毛球）</td><td>潘峰</td><td>4-15 周</td><td>江安/体育场馆</td></tr><tr><td>周三</td><td>10-11节</td><td>大学生心理健康</td><td>贺婷</td><td>11-18 周</td><td>江安/综合楼 C座 C506</td></tr><tr><td>周三</td><td>8-9节</td><td>军事技能</td><td>杨力萍</td><td>1-2 周</td><td>江安/一教D D503</td></tr><tr><td>周一</td><td>3-4节</td><td>科技哲学史</td><td>杜宛玥</td><td>3-18 周</td><td>江安/综合楼 C座 C503</td></tr><tr><td>周二</td><td>3-4节</td><td>微积分（Ⅰ）-1</td><td>李挺</td><td>3-18 周</td><td>江安/一教B B201</td></tr><tr><td>周二</td><td>5-7节</td><td>习近平新时代中国特色社会主义思想概论</td><td>曾胜</td><td>3-18 周</td><td>江安/综合楼 C座 C305</td></tr><tr><td>周三</td><td>1-2节</td><td>通用英语Ⅰ-1</td><td>潘静文</td><td>3-18 周</td><td>江安/二基楼 B座 B420</td></tr><tr><td>周三</td><td>8-9节</td><td>军事理论</td><td>王建容</td><td>4-15 周</td><td>江安/一教D D503</td></tr><tr><td>周四</td><td>8-9节</td><td>AI编程基础实训-1</td><td>周尧</td><td>3-18 周</td><td>江安/综合楼 C座 C207</td></tr><tr><td>周四</td><td>10-11节</td><td>AI编程基础-1</td><td>周尧</td><td>3-18 周</td><td>江安/综合楼 C座 C207</td></tr><tr><td>周四</td><td>8-9节</td><td>新生研讨课</td><td>蒲亦非</td><td>4-11 周</td><td>江安/一教B B405</td></tr><tr><td>周五</td><td>1-2节</td><td>新生研讨课</td><td>蒲亦非</td><td>3-18 周</td><td>江安/一教B B101</td></tr><tr><td>周五</td><td>10-11节</td><td>国家安全教育</td><td>王辉</td><td>6,10 周</td><td>江安/一教B B407</td></tr></table></section><section class="card"><h2>材料库与待补充</h2><p class="hint">把新文件丢进 <span class="cmd">materials/</span>，再运行 <span class="cmd">python app.py replan</span>：材料会被登记并提示需修订的计划项。</p><div class="kv"><span>materials/培养方案.md<br><span style="color:var(--muted);font-size:12px">课程体系三层结构、必修/选修清单、实践环节</span></span><b>已入库</b></div><div class="kv"><span>materials/本学期课程表.md<br><span style="color:var(--muted);font-size:12px">13 条课程安排 / 12 门课 / 24 学分、每周 22 学时、教师与教室；与讲座文件的周次互相印证</span></span><b>已入库</b></div><div class="kv"><span>materials/已有规划.md<br><span style="color:var(--muted);font-size:12px">保研/考研双轨路线、竞赛清单、科研入门五步、年度打卡表</span></span><b>已入库</b></div><div class="kv"><span>materials/讲座.txt<br><span style="color:var(--muted);font-size:12px">11 场教授开放日（第6-16周，含日期/节次/教师/方向），已转为 plan.json 的 fixed_events</span></span><b>已入库</b></div><div style="margin-top:12px;font-weight:600;font-size:13px">待补充材料（补上就能细化计划）</div><ol class="steps"><li>各科教学大纲/考核方式（决定平时分策略）</li><li>官方校历与期末考试安排（用于替换当前预估日期）</li><li>保研细则（绩点算法、加分项、名额比例）</li><li>转专业/辅修政策（如考虑）</li><li>目标竞赛的历年真题与报名通知</li></ol><div style="margin-top:12px;font-weight:600;font-size:13px">已登记文件指纹</div><div class="kv"><span>materials/培养方案.md</span><b>5207 B</b></div><div class="kv"><span>materials/已有规划.md</span><b>7575 B</b></div><div class="kv"><span>materials/本学期课程表.md</span><b>5352 B</b></div><div class="kv"><span>materials/讲座.txt</span><b>1944 B</b></div></section></div></div><footer>计划真源 <span class="cmd">plan.json</span>　·　打卡记录 <span class="cmd">state/completions.json</span>　·　可视化 <span class="cmd">dashboard.html</span><br>常用命令：<span class="cmd">python app.py today</span>　<span class="cmd">python app.py done 1</span>　<span class="cmd">python app.py report --quarter</span>　<span class="cmd">python app.py serve --port 8765</span><br>所有赛事时间、保研细则以四川大学教务处与学院当年正式通知为准。</footer><script id="bootstrap" type="application/json">{"date": "2026-09-30", "tasks": [{"key": "2026-09-30::class-105799020-1-2节", "done": false}, {"key": "2026-09-30::class-888004010A05-5-6节", "done": false}, {"key": "2026-09-30::class-900004020-8-9节", "done": false}, {"key": "2026-09-30::vocab-cet4", "done": true}, {"key": "2026-09-30::leetcode", "done": true}, {"key": "2026-09-30::github-commit", "done": true}, {"key": "2026-09-30::calculus-drill", "done": true}, {"key": "2026-09-30::course-review", "done": true}, {"key": "2026-09-30::custom-c4ba71cf0", "done": true}]}</script><script>
+const OFFICIAL = location.protocol.indexOf('http') === 0;
+async function toggle(box){
+  const key = box.dataset.key;
+  const done = box.checked;
+  const li = box.closest('li');
+  li.classList.toggle('done', done);
+  if(!OFFICIAL){ return; }
+  try{
+    const r = await fetch('/api/toggle', {method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({key:key, done:done})});
+    const j = await r.json();
+    if(!j.ok){ throw new Error(j.error || '保存失败'); }
+    const el = document.getElementById('kpi-done');
+    if(el && j.done_count !== undefined){ el.textContent = j.done_count; }
+  }catch(e){
+    box.checked = !done;
+    li.classList.toggle('done', !done);
+    alert('未保存：' + e.message + '\n请先运行 python app.py serve，再从 http://127.0.0.1:8765/ 打开本页面。');
+  }
+}
+document.querySelectorAll('input.check').forEach(function(b){
+  if(b.closest('li').classList.contains('track-class')){ b.style.display = 'none'; }
+  b.addEventListener('change', function(){ toggle(b); });
+});
+
+// —— 自定义任务：网页端添加 / 删除 ——
+function showOffline(msg){
+  const w = document.getElementById('ct-warn');
+  if(w){ w.textContent = msg; w.hidden = false; }
+}
+async function addCustom(ev){
+  ev.preventDefault();
+  const f = ev.target;
+  const val = function(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const days = Array.prototype.slice.call(f.querySelectorAll('input.wdbox:checked'))
+                 .map(function(x){ return parseInt(x.value, 10); });
+  const payload = {
+    title: val('ct-title'),
+    from: val('ct-from'),
+    to: val('ct-to') || val('ct-from'),
+    minutes: parseInt(val('ct-min') || '30', 10),
+    steps: val('ct-steps') ? val('ct-steps').split('\n').filter(function(s){ return s.trim(); }) : [],
+    proof: val('ct-proof'),
+    days: days
+  };
+  if(!payload.title){ showOffline('请先填写任务名。'); return false; }
+  if(!OFFICIAL){ showOffline('直接双击打开的页面不能添加任务：请先运行 python app.py serve，再用 http://127.0.0.1:8765/ 打开。'); return false; }
+  try{
+    const r = await fetch('/api/custom', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)});
+    const j = await r.json();
+    if(!j.ok){ throw new Error(j.error || '添加失败'); }
+    location.reload();
+  }catch(e){
+    showOffline('添加失败：' + e.message);
+  }
+  return false;
+}
+async function removeCustom(id){
+  if(!OFFICIAL){ showOffline('直接双击打开的页面不能删除任务：请从本地服务打开。'); return; }
+  if(!confirm('删除这个自定义任务？已勾选的记录也会一并清除。')){ return; }
+  try{
+    const r = await fetch('/api/custom/delete', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:id})});
+    const j = await r.json();
+    if(!j.ok){ throw new Error(j.error || '删除失败'); }
+    location.reload();
+  }catch(e){
+    showOffline('删除失败：' + e.message);
+  }
+}
+// —— 时间线：按日期折叠 / 展开 ——
+// 折叠的单位是"日期"：收起时只看到 日期·星期·还有几天·N 项
+const TL_FOLD = 12;
+function toggleAllTimeline(){
+  const list = document.getElementById('tl-list');
+  if(!list){ return; }
+  const items = Array.prototype.slice.call(list.querySelectorAll('details.tl-date'));
+  const anyClosed = items.some(function(d){ return !d.open; });
+  items.forEach(function(d){ d.open = anyClosed; });
+  list.querySelectorAll('li.tl-hidden').forEach(function(li){ li.classList.remove('tl-hidden'); });
+  const more = document.getElementById('tl-more-hint');
+  if(more){ more.style.display = 'none'; }
+  list.classList.add('tl-expanded');
+}
+
+(function(){
+  const f = document.getElementById('ct-form');
+  if(f){ f.addEventListener('submit', addCustom); }
+  const from = document.getElementById('ct-from');
+  const to = document.getElementById('ct-to');
+  if(from && to){
+    from.value = from.value || document.body.dataset.today || '';
+    to.addEventListener('change', function(){ if(to.value){ from.value = to.value; } });
+  }
+})();
+</script></body></html>

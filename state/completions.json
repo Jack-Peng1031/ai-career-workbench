@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "records": {
+    "2026-09-30::custom-c4ba71cf0": {
+      "status": "done",
+      "at": "2026-09-30T18:39:20",
+      "day": "2026-09-30",
+      "title": "整理计划",
+      "template_id": null
+    },
+    "2026-09-30::github-commit": {
+      "status": "done",
+      "at": "2026-09-30T19:25:16",
+      "day": "2026-09-30",
+      "title": "GitHub 仓库提交（代码/笔记都算）",
+      "template_id": "github-commit"
+    },
+    "2026-09-30::calculus-drill": {
+      "status": "done",
+      "at": "2026-09-30T19:25:16",
+      "day": "2026-09-30",
+      "title": "微积分（Ⅰ）-1 计算训练",
+      "template_id": "calculus-drill"
+    },
+    "2026-09-30::course-review": {
+      "status": "done",
+      "at": "2026-09-30T19:25:18",
+      "day": "2026-09-30",
+      "title": "当日课堂复盘（每门课 10 分钟）",
+      "template_id": "course-review"
+    },
+    "2026-09-30::vocab-cet4": {
+      "status": "done",
+      "at": "2026-09-30T19:26:06",
+      "day": "2026-09-30",
+      "title": "CET-4 词汇 50 词（背新词+复习昨日）",
+      "template_id": "vocab-cet4"
+    },
+    "2026-09-30::leetcode": {
+      "status": "done",
+      "at": "2026-09-30T19:26:06",
+      "day": "2026-09-30",
+      "title": "LeetCode 刷题",
+      "template_id": "leetcode"
+    }
+  }
+}

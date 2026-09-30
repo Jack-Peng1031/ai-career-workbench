@@ -1,0 +1,481 @@
+{
+  "schema_version": "1.0",
+  "student": {
+    "name": "本人",
+    "university": "四川大学",
+    "college": "计算机学院（软件学院、智能科学与技术学院）",
+    "major": "人工智能",
+    "cohort": "2026级",
+    "goal": "保研优先 / 考研兜底 双轨",
+    "english_target": "大一下通过CET-4（550+），大二上 CET-6 500+",
+    "research_target": "大二进课题组，大三产出一篇论文/高质量开源项目",
+    "note": "本文件是可编辑的计划唯一真源；每次改动后运行 `python app.py replan` 即可重算未来所有清单。"
+  },
+
+  "calendar": {
+    "today_anchor": "2026-09-30",
+    "semester": {
+      "name": "2026-2027学年 秋季学期",
+      "term": "fall-2026",
+      "week_anchor": { "date": "2026-09-30", "week": 5 },
+      "week1_monday": "2026-08-31",
+      "teaching_weeks": 18,
+      "exam_week": 19,
+      "winter_break_start": "2027-01-25",
+      "spring_week1_monday": "2027-02-22"
+    },
+    "timezone": "Asia/Shanghai"
+  },
+
+  "key_dates": [
+    { "date": "2026-10-01", "title": "国庆假期（10/1-10/7，第5-6教学周）", "kind": "holiday", "action": "只保留单词+刷题各1个最小单元，其余任务自动顺延" },
+    { "date": "2026-10-09", "title": "国家安全教育 第1次课（全学期只有第6、10周两次）", "kind": "academic", "action": "这门前两次缺一次就缺一半，务必到课" },
+    { "date": "2026-11-06", "title": "国家安全教育 第2次课", "kind": "academic", "action": "同上，结束时确认考核方式与平时分构成" },
+    { "date": "2026-11-11", "title": "大学生心理健康 开课（第11周起）", "kind": "academic", "action": "考查课，出勤即主要得分项" },
+    { "date": "2026-11-28", "title": "校历第13教学周 · 期中教学检查周", "kind": "academic", "action": "核对各科平时分与作业完成情况" },
+    { "date": "2026-12-12", "title": "CET-4 笔试（预估，以教务处通知为准）", "kind": "exam", "action": "最后一次全真模考，考前一周只做真题" },
+    { "date": "2026-12-20", "title": "蓝桥杯报名窗口期（关注官网，通常12月-1月）", "kind": "registration", "action": "完成省赛报名，选定C/C++组" },
+    { "date": "2027-01-11", "title": "期末考试周（第19周起，预估）", "kind": "exam", "action": "进入复习周：数学与编程课优先" },
+    { "date": "2027-01-25", "title": "寒假开始", "kind": "holiday", "action": "寒假计划：100题 + Python数据分析入门" },
+    { "date": "2027-02-22", "title": "春季学期开学（预估）", "kind": "academic", "action": "微积分Ⅰ-2、线性代数、AI编程基础-2、人工智能引论" },
+    { "date": "2027-04-10", "title": "蓝桥杯省赛（预估，以官网为准）", "kind": "contest", "action": "目标省三及以上" },
+    { "date": "2027-06-12", "title": "CET-4 补考/刷分场次（若首考未达标）", "kind": "exam", "action": "首考已过则改为CET-6启动" },
+    { "date": "2027-07-01", "title": "大一学年结束 · 年度复盘", "kind": "milestone", "action": "复盘绩点、题量、英语、竞赛，修订大二计划" }
+  ],
+
+  "course_meetings": [
+    { "code": "888004010A05", "name": "体育-1（羽毛球）", "credits": 1, "teacher": "潘峰", "day": 3, "periods": "5-6节", "weeks": "4-15", "place": "江安/体育场馆" },
+    { "code": "912002010",  "name": "大学生心理健康", "credits": 1, "teacher": "贺婷", "day": 3, "periods": "10-11节", "weeks": "11-18", "place": "江安/综合楼 C座 C506" },
+    { "code": "900005020",  "name": "军事技能", "credits": 2, "teacher": "杨力萍", "day": 3, "periods": "8-9节", "weeks": "1-2", "place": "江安/一教D D503" },
+    { "code": "107508020",  "name": "科技哲学史", "credits": 2, "teacher": "杜宛玥", "day": 1, "periods": "3-4节", "weeks": "3-18", "place": "江安/综合楼 C座 C503" },
+    { "code": "201137050",  "name": "微积分（Ⅰ）-1", "credits": 5, "teacher": "李挺", "day": 2, "periods": "3-4节", "weeks": "3-18", "place": "江安/一教B B201" },
+    { "code": "107447030",  "name": "习近平新时代中国特色社会主义思想概论", "credits": 3, "teacher": "曾胜", "day": 2, "periods": "5-7节", "weeks": "3-18", "place": "江安/综合楼 C座 C305" },
+    { "code": "105799020",  "name": "通用英语Ⅰ-1", "credits": 2, "teacher": "潘静文", "day": 3, "periods": "1-2节", "weeks": "3-18", "place": "江安/二基楼 B座 B420" },
+    { "code": "900004020",  "name": "军事理论", "credits": 2, "teacher": "王建容", "day": 3, "periods": "8-9节", "weeks": "4-15", "place": "江安/一教D D503" },
+    { "code": "315003010",  "name": "AI编程基础实训-1", "credits": 1, "teacher": "周尧", "day": 4, "periods": "8-9节", "weeks": "3-18", "place": "江安/综合楼 C座 C207" },
+    { "code": "315002020",  "name": "AI编程基础-1", "credits": 2, "teacher": "周尧", "day": 4, "periods": "10-11节", "weeks": "3-18", "place": "江安/综合楼 C座 C207" },
+    { "code": "315001010",  "name": "新生研讨课", "credits": 1, "teacher": "蒲亦非", "day": 4, "periods": "8-9节", "weeks": "4-11", "place": "江安/一教B B405" },
+    { "code": "315001010",  "name": "新生研讨课", "credits": 1, "teacher": "蒲亦非", "day": 5, "periods": "1-2节", "weeks": "3-18", "place": "江安/一教B B101" },
+    { "code": "107482010",  "name": "国家安全教育", "credits": 1, "teacher": "王辉", "day": 5, "periods": "10-11节", "weeks": "6,10", "place": "江安/一教B B407" }
+  ],
+
+  "tracks": [
+    {
+      "id": "gpa",
+      "name": "绩点主线（保研最重）",
+      "color": "#2f6feb",
+      "daily_minutes": 60,
+      "why": "大一绩点决定保研安全区，微积分/线代/编程基础是权重最高的三门"
+    },
+    {
+      "id": "code",
+      "name": "编程与算法",
+      "color": "#12a150",
+      "daily_minutes": 45,
+      "why": "决定大二算法竞赛高度，也是考研408的地基"
+    },
+    {
+      "id": "english",
+      "name": "英语",
+      "color": "#d29922",
+      "daily_minutes": 30,
+      "why": "CET-4 是硬门槛，越早清掉越省心"
+    },
+    {
+      "id": "research",
+      "name": "科研与信息",
+      "color": "#8250df",
+      "daily_minutes": 20,
+      "why": "科研经历是保研面试硬通货，信息差是最冤的输法"
+    }
+  ],
+
+  "task_templates": [
+    {
+      "id": "vocab-cet4",
+      "track": "english",
+      "title": "CET-4 词汇 50 词（背新词+复习昨日）",
+      "minutes": 25,
+      "days": [1, 2, 3, 4, 5, 6],
+      "steps": [
+        "用 App 过 50 个新词，只求认得、不求拼写全对",
+        "用 10 分钟回滚昨天与三天前的词表（艾宾浩斯第1/3天）",
+        "把今天连续错的 5 个词抄进 `records/english/生词本.md`"
+      ],
+      "proof": "生词本当天新增 ≥5 条",
+      "recurrence": "daily",
+      "unit": "天",
+      "target": 30,
+      "target_by": "2026-12-12",
+      "note": "考试当天为节点；没时间时至少做复习那一步（10分钟）"
+    },
+    {
+      "id": "english-reading",
+      "track": "english",
+      "title": "英语精读/听力 1 个单元",
+      "minutes": 20,
+      "days": [2, 4, 6],
+      "steps": [
+        "精读：1 篇四级真题阅读，限时 8 分钟做完再逐句翻译",
+        "听力：1 组短对话（约 8 题）对答案并复听错题",
+        "把生词与长难句结构记到 `records/english/`"
+      ],
+      "proof": "错题原因写在记录里（词汇/长难句/逻辑三类之一）",
+      "recurrence": "daily",
+      "unit": "天",
+      "target": 18,
+      "target_by": "2026-12-12"
+    },
+    {
+      "id": "english-mock",
+      "track": "english",
+      "title": "CET-4 全真模考（限时 125 分钟）",
+      "minutes": 125,
+      "days": [6],
+      "steps": [
+        "严格计时 125 分钟，一次做完写作+听力+阅读+翻译",
+        "对答案，按题型统计得分率写进 `records/english/模考记录.md`",
+        "找出本次最弱的 1 个题型，列入下周专项"
+      ],
+      "proof": "模考记录新增一行（分数+最弱题型）",
+      "recurrence": "weekly",
+      "unit": "次",
+      "target": 10,
+      "target_by": "2026-12-12",
+      "note": "CET-4 在第15教学周（2026-12-12）考试：10月起每1-2周一次，11月起每两周刷到每周一次，共约10次"
+    },
+
+    {
+      "id": "leetcode",
+      "track": "code",
+      "title": "LeetCode 刷题",
+      "minutes": 45,
+      "days": [1, 2, 3, 4, 5, 6, 7],
+      "steps": [
+        "按当前周计划刷当周专题（数组/字符串 → 双指针 → 二分 → 递归回溯 → 基础DP）",
+        "每题先自己写 15 分钟，卡住再看题解，看完必须关掉题解重写一遍",
+        "写完记录：题目、难度、卡点、复杂度分析"
+      ],
+      "proof": "`records/code/刷题日志.md` 增加当日条目，题量字段填写真实完成数",
+      "recurrence": "daily",
+      "unit": "题",
+      "target": 100,
+      "target_by": "2026-12-26",
+      "note": "90天100题：平时1-2题，周末补到3-4题。首月只做 Easy/入门 Medium"
+    },
+    {
+      "id": "ai-code-practice",
+      "track": "code",
+      "title": "AI编程基础-1 课后代码实操",
+      "minutes": 30,
+      "days": [4, 6],
+      "steps": [
+        "把本周课堂讲过的语法/例子自己重敲一遍，不看课件",
+        "在 `records/code/ai-basics/` 建当周文件夹，写完并运行通过",
+        "把报错与解决方式记 3 行，形成自己的坑位库"
+      ],
+      "proof": "当周文件夹里有可运行代码 + 报错记录",
+      "recurrence": "daily",
+      "unit": "次",
+      "target": 28,
+      "target_by": "2027-01-11"
+    },
+    {
+      "id": "github-commit",
+      "track": "code",
+      "title": "GitHub 仓库提交（代码/笔记都算）",
+      "minutes": 10,
+      "days": [1, 3, 5, 7],
+      "steps": [
+        "把当天的代码或笔记整理进仓库",
+        "写一条有信息量的 commit message（做了什么、为什么）",
+        "push 后确认主页贡献格变绿"
+      ],
+      "proof": "GitHub 主页当天出现绿色格子",
+      "recurrence": "daily",
+      "unit": "天",
+      "target": 40,
+      "target_by": "2027-01-11",
+      "note": "目标是简历上有一条连续的贡献曲线，不是刷绿格子"
+    },
+    {
+      "id": "contest-prep",
+      "track": "code",
+      "title": "蓝桥杯备赛专项（按专题推进）",
+      "minutes": 40,
+      "days": [6],
+      "steps": [
+        "按专题过一遍：枚举/模拟 → 排序/贪心 → 搜索DFS-BFS → 递推/基础DP → 数论与组合",
+        "每个专题手写 3 道真题，写不出也要先写出暴力解",
+        "整理该专题的模板代码到 `records/code/模板/`"
+      ],
+      "proof": "当周专题模板文件 + 3 道题解记录",
+      "recurrence": "weekly",
+      "unit": "次",
+      "target": 12,
+      "target_by": "2027-04-10",
+      "note": "12月完成报名，4月省赛；备赛与刷题共用一套题量"
+    },
+
+    {
+      "id": "calculus-drill",
+      "track": "gpa",
+      "title": "微积分（Ⅰ）-1 计算训练",
+      "minutes": 40,
+      "days": [1, 2, 3, 4, 5],
+      "steps": [
+        "复习当天课堂内容，把课本例题合上重做一遍",
+        "做 5-8 道课后题，重点练极限/导数/中值定理这类高频题型",
+        "每周至少 2 次把关键定理用自己的话讲一遍（能讲清才算会）"
+      ],
+      "proof": "演算纸或错题本上留下当天痕迹；错题标注错误原因",
+      "recurrence": "daily",
+      "unit": "天",
+      "target": 60,
+      "target_by": "2027-01-11",
+      "note": "权重最高的一门课，保研排名的主要分水岭"
+    },
+    {
+      "id": "course-review",
+      "track": "gpa",
+      "title": "当日课堂复盘（每门课 10 分钟）",
+      "minutes": 30,
+      "days": [1, 2, 3, 4, 5],
+      "steps": [
+        "打开今天的课表，逐门回忆：这节课讲了什么？考点在哪？",
+        "把没听懂的点写成问题清单，第二天课间问老师或同学",
+        "作业当天或次日完成，不拖到截止前",
+        "重点盯：通用英语Ⅰ-1、科技哲学史、国家安全教育、军事理论、大学生心理健康"
+      ],
+      "proof": "问题清单里每个问题都有后续处理结果",
+      "recurrence": "daily",
+      "unit": "天",
+      "target": 60,
+      "target_by": "2027-01-11"
+    },
+    {
+      "id": "polish-quiz",
+      "track": "gpa",
+      "title": "思政/通识课知识点卡片",
+      "minutes": 15,
+      "days": [2, 5],
+      "steps": [
+        "把习概/国家安全教育/科技哲学史的关键概念做成 3-5 张卡片",
+        "卡片正面写问题、背面写要点，周末自测一次",
+        "这些课平时分靠出勤+作业，务必不要缺勤"
+      ],
+      "proof": "卡片新增 ≥3 张",
+      "recurrence": "daily",
+      "unit": "次",
+      "target": 28,
+      "target_by": "2027-01-11"
+    },
+    {
+      "id": "weekly-review",
+      "track": "gpa",
+      "title": "周复盘（30 分钟）",
+      "minutes": 30,
+      "days": [7],
+      "steps": [
+        "看本周完成率：`python app.py report --week`",
+        "统计刷题量、单词天数、各科作业是否清零",
+        "写 3 行：本周做对了什么、失控点在哪、下周只改一件事",
+        "更新 `plan.json` 中不合理的任务时长，然后 `python app.py replan`"
+      ],
+      "proof": "`records/reviews/` 出现本周复盘文件",
+      "recurrence": "weekly",
+      "unit": "次",
+      "target": 14,
+      "target_by": "2027-01-11"
+    },
+
+    {
+      "id": "info-scout",
+      "track": "research",
+      "title": "信息侦察一小步",
+      "minutes": 15,
+      "days": [1, 4],
+      "steps": [
+        "第1-2周：查清人工智能专业保研细则（绩点算法、加分项、名额）存档",
+        "第3-4周：加 1 位直系学长/学姐，问清大一最该注意什么",
+        "第5-6周：摸清学校算法队/ACM集训队/实验室的纳新时间与门槛",
+        "第7周起：关注学院科研创新训练-1 的报名与导师名单"
+      ],
+      "proof": "`records/info/` 里有存档或联系人记录（截图/链接/聊天要点）",
+      "recurrence": "daily",
+      "unit": "次",
+      "target": 24,
+      "target_by": "2027-01-11"
+    },
+    {
+      "id": "python-datastack",
+      "track": "research",
+      "title": "Python 数据栈入门（Numpy/Pandas）",
+      "minutes": 30,
+      "days": [6],
+      "steps": [
+        "按章节推进：Numpy 数组运算 → Pandas 读写与筛选 → 简单可视化",
+        "每章在 `records/code/python-datastack/` 写一个能跑通的小脚本",
+        "寒假目标：完整读 1 本数据分析入门书"
+      ],
+      "proof": "当周小脚本可运行 + 笔记",
+      "recurrence": "weekly",
+      "unit": "次",
+      "target": 14,
+      "target_by": "2027-02-28"
+    },
+    {
+      "id": "lab-watch",
+      "track": "research",
+      "title": "实验室/组会观察",
+      "minutes": 20,
+      "days": [5],
+      "steps": [
+        "关注学院官网与导师主页，记录 3 位感兴趣的老师及其方向",
+        "争取旁听一次组会或公开讲座，写下 3 个不懂的名词",
+        "把不懂的名词查清，形成一页方向认知笔记"
+      ],
+      "proof": "`records/info/导师与方向.md` 有更新",
+      "recurrence": "daily",
+      "unit": "次",
+      "target": 14,
+      "target_by": "2027-01-11"
+    },
+    {
+      "id": "reading-frontier",
+      "track": "research",
+      "title": "前沿阅读（科普级，别硬啃论文）",
+      "minutes": 20,
+      "days": [7],
+      "steps": [
+        "读 1 篇 AI 科普/综述解读（公众号、知乎专栏、arXiv 摘要均可）",
+        "用 3 句话写清：解决什么问题、怎么做的、和我学的哪门课有关",
+        "积累到 12 篇后，回头看自己更被哪个方向吸引"
+      ],
+      "proof": "`records/research/前沿阅读.md` 新增一条三句话摘要",
+      "recurrence": "weekly",
+      "unit": "次",
+      "target": 14,
+      "target_by": "2027-01-11"
+    }
+  ],
+
+  "milestones": [
+    {
+      "id": "m-30",
+      "window_days": 30,
+      "title": "第 1 个月：把习惯与工具链立起来",
+      "due": "2026-10-30",
+      "checks": [
+        "微积分每天有演算痕迹，累计 ≥20 天",
+        "LeetCode 累计 ≥30 题，刷题日志每天有记录",
+        "词汇累计 ≥22 天，四级核心词过完第一遍",
+        "GitHub 仓库建好并有 ≥12 次提交",
+        "AI编程基础-1 课后代码全部自己重敲过一遍",
+        "查清保研细则并存档（绩点算法、加分项、名额）"
+      ]
+    },
+    {
+      "id": "m-90",
+      "window_days": 90,
+      "title": "90 天：期末不塌方 + 四级过关 + 100 题",
+      "due": "2026-12-29",
+      "checks": [
+        "期末：微积分、AI编程基础、AI编程基础实训全部 ≥85 分（目标专业前30%）",
+        "CET-4 首考参加，目标 550+",
+        "LeetCode 累计 ≥100 题",
+        "完成蓝桥杯省赛报名",
+        "所有通识/思政课无缺勤、无挂科风险",
+        "python 数据栈入门完成 Numpy+Pandas 基础"
+      ]
+    },
+    {
+      "id": "m-365",
+      "window_days": 365,
+      "title": "一年：大一学年收官，进入大二竞赛与科研",
+      "due": "2027-07-01",
+      "checks": [
+        "大一学年绩点进入专业前 30%",
+        "第16届/第17届蓝桥杯省赛拿到省三及以上",
+        "LeetCode 累计 ≥300 题，会写常见模板",
+        "CET-6 启动（或四级 550+ 已达成）",
+        "进入 1 个课题组旁听组会，或完成 1 次大创立项调研",
+        "确定主攻方向种子：CV / NLP / 大模型 / 数据挖掘 四选一",
+        "读完 1 本 Python 数据分析入门书并有配套代码仓库"
+      ]
+    }
+  ],
+
+  "phase_overrides": [
+    {
+      "id": "holiday-national-day",
+      "from": "2026-10-01",
+      "to": "2026-10-07",
+      "title": "国庆假期",
+      "keep_task_ids": ["vocab-cet4", "leetcode"],
+      "extra": [
+        { "title": "假期收尾：整理前 3 周笔记，补齐所有拖欠作业", "minutes": 90 }
+      ],
+      "note": "教室与自习室开放时间变化，提前确认；其余任务自动顺延"
+    },
+    {
+      "id": "midterm-window",
+      "from": "2026-11-23",
+      "to": "2026-11-29",
+      "title": "期中检查周",
+      "intro": "本周加强各科作业清零与平时分核对。",
+      "extra": [
+        { "title": "核对每门课的平时分构成与当前完成情况", "minutes": 45 }
+      ]
+    },
+    {
+      "id": "exam-prep",
+      "from": "2026-12-14",
+      "to": "2027-01-24",
+      "title": "期末复习期",
+      "intro": "刷题与词汇转入维护量，主战场回到课程考试。",
+      "scale": { "leetcode": 0.5, "vocab-cet4": 0.6, "calculus-drill": 1.6, "course-review": 1.5, "contest-prep": 0.0 },
+      "force_daily": ["calculus-drill", "course-review"],
+      "keep_task_ids": ["calculus-drill", "course-review", "english-reading", "leetcode", "vocab-cet4"],
+      "extra": [
+        { "title": "期末冲刺：当天最弱的一门课做一套往年题/课本复习题", "minutes": 60 }
+      ]
+    },
+    {
+      "id": "winter-break",
+      "from": "2027-01-25",
+      "to": "2027-02-21",
+      "title": "寒假（节奏切换）",
+      "intro": "第20-21教学周为机动/考试收尾，寒假自 2027-01-25 起（与 calendar.semester.winter_break_start 对齐）。",
+      "keep_task_ids": ["leetcode", "vocab-cet4", "python-datastack", "contest-prep", "english-reading"],
+      "scale": { "leetcode": 1.5 },
+      "extra": [
+        { "title": "寒假主线：100 道算法题 + 1 本 Python 数据分析入门", "minutes": 120 }
+      ]
+    }
+  ],
+
+  "day_rules": {
+    "weekend_multiplier": 1.25,
+    "max_minutes_per_day": 210,
+    "min_minutes_per_day": 60,
+    "rest_low_load_message": "今天课少，把省下的时间给微积分和刷题——这是拉开排名的两种活。"
+  },
+
+  "materials": {
+    "dir": "materials",
+    "manifest": "state/materials.json",
+    "watched": [
+      { "path": "materials/培养方案.md", "role": "curriculum", "status": "已入库", "extracted": "课程体系三层结构、必修/选修清单、实践环节" },
+      { "path": "materials/本学期课程表.md", "role": "schedule", "status": "已入库", "extracted": "14门课、23学分、每周22学时、教师与教室" },
+      { "path": "materials/已有规划_ai已拟出的计划.md", "role": "strategy", "status": "已入库", "extracted": "保研/考研双轨路线、竞赛清单、科研入门五步、年度打卡表" }
+    ],
+    "pending_intake": [
+      "各科教学大纲/考核方式（决定平时分策略）",
+      "校历与期末考试安排",
+      "保研细则（绩点算法、加分项、名额比例）",
+      "转专业/辅修政策（如考虑）",
+      "目标竞赛的历年真题与报名通知"
+    ]
+  }
+}

@@ -1,0 +1,190 @@
+row01 col1: 912002010
+row01 col2: 健康 ﻿大学﻿生﻿心理
+row01 col3: ﻿日历
+row01 col4: ﻿大纲
+row01 col5: 33
+row01 col6: 1
+row01 col7: 修 必
+row01 col8: 康 与健 ﻿生命 块- 模 通识
+row01 col10: * 婷 贺
+row01 col11: 常 正
+row01 col12: ﻿入 置
+row01 col14: 允许修读类型主修
+row01 col16: 节 10-11 期三/ 周/星 11-18
+row01 col17: C506 C座/ 综合楼 江安/
+row02 col1: 900005020
+row02 col2: 军事技能
+row02 col3: ﻿日历
+row02 col4: ﻿大纲
+row02 col5: 27
+row02 col6: 2
+row02 col7: 修 必
+row02 col8: 课 统﻿一 国家
+row02 col9: 查 考
+row02 col10: * 萍 ﻿力 杨
+row02 col11: 常 正
+row02 col12: ﻿入 置
+row02 col14: 允许修读类型主修
+row02 col16: 1-2周
+row03 col1: 900004020
+row03 col2: 军事理论
+row03 col3: ﻿日历
+row03 col4: ﻿大纲
+row03 col5: 24
+row03 col6: 2
+row03 col7: 修 必
+row03 col8: 课 统﻿一 国家
+row03 col9: 试 考
+row03 col10: * 容 建 王
+row03 col11: 常 正
+row03 col12: ﻿入 置
+row03 col14: 允许修读类型主修
+row03 col16: 8-9节 期三/ 周/星 4-15
+row03 col17: D503 座/ ﻿一教D 江安/
+row04 col1: 315003010
+row04 col2: 实训-1 AI编程基础
+row04 col3: ﻿日历
+row04 col4: ﻿大纲
+row04 col5: 01
+row04 col6: 1
+row04 col7: 修 必
+row04 col9: 查 考
+row04 col10: * 尧 周
+row04 col11: 常 正
+row04 col12: ﻿入 置
+row04 col14: 主修 院﻿人﻿工智能允许修读类型 允许院系专业﻿人﻿工智能学
+row04 col16: 12 期四/ 周/星 3-18
+row04 col17: C207 C座/ 综合楼 江安/
+row05 col1: 315002020
+row05 col2: 础-1 AI编程基
+row05 col3: ﻿日历
+row05 col4: ﻿大纲
+row05 col5: 01
+row05 col6: 2
+row05 col7: 修 必
+row05 col9: 试 考
+row05 col10: * 尧 周
+row05 col11: 常 正
+row05 col12: ﻿入 置
+row05 col14: 主修 院﻿人﻿工智能允许修读类型 允许院系专业﻿人﻿工智能学
+row05 col16: 节 10-11 期四/ 周/星 3-18
+row05 col17: C207 C座/ 综合楼 江安/
+row06 col1: 315001010
+row06 col2: 新﻿生研讨课
+row06 col3: ﻿日历
+row06 col4: ﻿大纲
+row06 col5: 01
+row06 col6: 1
+row06 col7: 修 必
+row06 col9: 查 考
+row06 col10: * ﻿非 亦 蒲
+row06 col11: 常 正
+row06 col12: ﻿入 置
+row06 col14: 263150102263150201 262010802263150101 班级：262010801 允许修读类型主修允许
+row06 col16: 8-9节 期四/ 周/星 4-11
+row06 col17: B405 座/ ﻿一教B 江安/
+row07 col16: 1-2节 期五/ 周/星 3-18
+row07 col17: B101 座/ ﻿一教B 江安/
+row08 col16: 1-2节 期四/ 周/星 3-18
+row08 col17: B101 座/ ﻿一教B 江安/
+row09 col1: 201137050
+row09 col2: （Ⅰ）-1 微积分
+row09 col3: ﻿日历
+row09 col4: ﻿大纲
+row09 col5: 23
+row09 col6: 5
+row09 col7: 修 必
+row09 col10: * 挺 李
+row09 col11: 常 正
+row09 col12: ﻿入 置
+row09 col16: 3-4节 期﻿二/ 周/星 3-18
+row09 col17: B201 座/ ﻿一教B 江安/
+row10 col1: 107482010
+row10 col2: 育 国家安全教
+row10 col3: ﻿日历
+row10 col4: ﻿大纲
+row10 col5: 32
+row10 col6: 1
+row10 col7: 修 必
+row10 col8: 课 统﻿一 国家
+row10 col10: * 辉 王
+row10 col11: 常 正
+row10 col12: ﻿入 置
+row10 col14: 允许修读类型主修
+row10 col16: 节 10-11 期五/ 周/星 6,10
+row10 col17: B407 座/ ﻿一教B 江安/
+row11 col1: 107447030
+row11 col2: 想概论 社会主义思 代中国特﻿色 习近平新时
+row11 col3: ﻿日历
+row11 col4: ﻿大纲
+row11 col5: 48
+row11 col6: 3
+row11 col7: 修 必
+row11 col8: 课 统﻿一 国家
+row11 col9: 试 考
+row11 col10: * 胜 曾
+row11 col11: 常 正
+row11 col12: ﻿入 置
+row11 col13: 上课 在课堂 践，不 周实 16-17
+row11 col14: 主修 ﻿工程学院允许修读类型 电﻿子信息学院空天科学与 院）﻿网络空间安全学院 院、智能科学与技术学 学院计算机学院（软件学 允许院系专业：﻿人﻿工智能
+row11 col15: 1125254630
+row11 col16: 5-7节 期﻿二/ 周/星 3-18
+row11 col17: C305 C座/ 综合楼 江安/
+row12 col1: 105799020
+row12 col2: Ⅰ-1 通﻿用英语
+row12 col3: ﻿日历
+row12 col4: ﻿大纲
+row12 col5: 55
+row12 col6: 2
+row12 col7: 修 必
+row12 col10: * ﻿文 静 潘
+row12 col11: 常 正
+row12 col12: ﻿入 置
+row12 col15: 1022719393
+row12 col16: 1-2节 期三/ 周/星 3-18
+row12 col17: B420 B座/ ﻿二基楼 江安/
+row13 col1: 107508020
+row13 col2: 科技哲学史
+row13 col3: ﻿日历
+row13 col4: ﻿大纲
+row13 col5: 01
+row13 col6: 2
+row13 col7: 修 必
+row13 col9: 试 考
+row13 col10: * 玥 宛 杜
+row13 col11: 常 正
+row13 col12: 中 选
+row13 col13: 上课 在教室 周，不 实践 18周
+row13 col16: 3-4节 期﻿一/ 周/星 3-18
+row13 col17: C503 C座/ 综合楼 江安/
+row14 col1: 888004010A05
+row14 col2: 球 体育-1﻿羽﻿毛
+row14 col3: ﻿日历
+row14 col4: ﻿大纲
+row14 col5: 13
+row14 col6: 1
+row14 col7: 选 任
+row14 col8: 课 统﻿一 国家
+row14 col9: 查 考
+row14 col10: * 峰 潘
+row14 col11: 常 正
+row14 col12: 中 选
+row14 col16: 5-6节 期三/ 周/星 4-15
+row14 col17: 馆 /体育 体育场 江安/
+row15 col1: 课程号 zhjw.scu.edu.cn/stud 2026/9/3011:06
+row15 col2: 课程名 ent/courseSelect/th
+row15 col3: 历 教学﻿日 isSemesterC
+row15 col4: 纲 教学﻿大 urriculum/inde
+row15 col5: 号 序 课 x
+row15 col6: 分 学
+row15 col7: 性 属 程 课 本学
+row15 col8: 类别 课程 期课程表
+row15 col9: 型 类 试 考
+row15 col10: 师 教
+row15 col11: 式 ﻿方 读 修
+row15 col12: 态 状 课 选
+row15 col13: 注 排课备
+row15 col14: 选课限制说明 2/3
+row15 col15: QQ/微信群
+row15 col16: 时间
+row15 col17: 地点
