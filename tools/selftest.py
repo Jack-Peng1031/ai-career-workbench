@@ -330,9 +330,40 @@ def main() -> int:
         check("HTML 结构完整", html.rstrip().endswith("</html>") and html.count("class=\"card\"") >= 6)
         check("无未替换的模板花括号", "{{" not in html and "}}" not in html)
         check("无替换字符乱码", "\ufffd" not in html)
-        check("勾选框数量与任务数一致",
-              html.count('class="check"') == len(pe.tasks_for_day(plan, day)))
+        # 今日清单自己有勾选框；本周全景里同样的任务也各有一个（同 key，服务端按 key 去重）
+        today_sec = html.split('id="today"')[1].split('id="week"')[0]
+        check("今日清单勾选框数量与任务数一致",
+              today_sec.count('class="check"') == len(pe.tasks_for_day(plan, day)),
+              f"{today_sec.count('class=\"check\"')} vs {len(pe.tasks_for_day(plan, day))}")
         check("每日 Markdown 生成", "今日 todo" in rd.render_day_markdown(plan, day))
+
+        # [11a] 本周全景：条带 + 每一天的具体清单（功能一）
+        wk_html, wk_days = rd.render_week_panel(plan, day)
+        check("本周全景默认覆盖 14 天（本周 + 往后一周）", wk_days == 14, str(wk_days))
+        check("每一天都是一个可控展开的 details.wk-day",
+              wk_html.count('class="wk-day') == 14 and wk_html.count("<details") == 14,
+              f"{wk_html.count('class=\"wk-day')} / {wk_html.count('<details')}")
+        check("今天与明天默认展开，其余收起",
+              len(re.findall(r'data-date="[0-9-]+" open', wk_html)) == 2,
+              str(len(re.findall(r'data-date="[0-9-]+" open', wk_html))))
+        check("条带 7 个格子都能跳转（data-jump）",
+              wk_html.split('class="wk-panel"')[0].count("data-jump=") == 7,
+              str(wk_html.split('class="wk-panel"')[0].count("data-jump=")))
+        check("每周一段、段间有分隔线", wk_html.count("wk-gap") == 2, str(wk_html.count("wk-gap")))
+        check("本周全景里有展开/收起全部日期的开关",
+              'id="wk-toggle"' in wk_html and "toggleWeekDays" in html)
+        # 关键：条带下面必须真的是"具体清单"，而不是只有 7 个格子
+        check("每一天的清单里有具体任务标题（不是只有格子）",
+              wk_html.count('class="wk-tt"') >= 50, str(wk_html.count('class="wk-tt"')))
+        # 与今日清单同源：今天的每一项都要能在本周全景里找到
+        wk_today = wk_html.split('id="wk-day-' + day.isoformat() + '"')[1].split("</details>")[0]
+        missing = [t["title"] for t in pe.tasks_for_day(plan, day)
+                   if t["title"].split("（")[0][:6] not in wk_today]
+        check("本周全景里今天的清单与今日清单同源", not missing, str(missing))
+        # 非教学日（国庆假期）也要照实显示
+        check("假期里的日期同样会铺开清单（不会整段空白）",
+              'id="wk-day-2026-10-07"' in wk_html or 'id="wk-day-2026-10-08"' in wk_html)
+
         # 时间线：折叠的单位是"日期"（不是每条说明）
         tl_html, tl_n = rd.render_timeline(plan, day)
         check("时间线覆盖多于 8 天", tl_n > 8, str(tl_n))
@@ -344,6 +375,15 @@ def main() -> int:
               and "<b>" in tl_html and " 项</span>" in tl_html)
         check("任务标题在展开区、不再单行省略（无 tlt/ellipsis 结构）",
               'class="tl-items"' in tl_html and "tlbody" not in tl_html and 'class="tlt"' not in tl_html)
+        # 只有进度条那一行的标签还允许省略号（它是定宽右侧数值）；时间线与本周全景里
+        # 一旦出现省略号，长标题就会被吃掉——所以逐条规则检查。
+        def rules_of(css_text, *prefixes):
+            return [r for r in css_text.split("}") if any(p in r.split("{")[0] for p in prefixes)]
+
+        narrow = [r for r in rules_of(rd.CSS, "ul.tl", ".tl-", ".wk-", ".chip", ".stat")
+                  if ("ellipsis" in r or "nowrap" in r)
+                  and not any(k in r for k in (".wk-prog", ".wk-sid", "ul.tl .tlmeta", ".stat{"))]
+        check("时间线与本周全景的样式里没有省略号截断", not narrow, "；".join(narrow)[:200])
         check("今天与明天默认展开",
               'data-idx="0"' in tl_html and tl_html.split('data-idx="0"')[1].split(">")[0].find("open") >= 0
               and tl_html.count(" open>") >= 1,
@@ -359,6 +399,26 @@ def main() -> int:
         check("时间线里的日期都能解析",
               all(pe.parse_date("2026-" + x)
                   for x in re.findall(r'<span class="tld">([0-9]{2}-[0-9]{2})</span>', tl_html)))
+
+        # [11b] 主题配色（功能二）：层次 + 语义色
+        css = rd.CSS
+        check("定义了主色与语义色变量（ok/warn/danger/info）",
+              all(v in css for v in ("--primary:", "--ok:", "--warn:", "--danger:", "--info:")))
+        check("定义了表面层级变量（页面/下沉/卡片/卡片内层/浮起）",
+              all(v in css for v in ("--bg:", "--sunken:", "--panel:", "--panel-2:", "--raised:")))
+        check("卡片标题有独立底色条（.card > h2 带内边距与下边线）",
+              ".card > h2" in css and "border-bottom:1px solid var(--line-2)" in css)
+        check("深色模式覆盖了主色与语义色",
+              css.count("prefers-color-scheme:dark") >= 2 and "--primary:#6f9bfa" in css)
+        check("页面用的标签类都随轨道变色（tg-*）",
+              all(("tg-" + t) in css for t in
+                  ("gpa", "code", "english", "research", "class", "phase", "extra", "custom")))
+        check("状态胶囊分三档（完成/临近/常规）",
+              all(x in css for x in ("stat-ok", "stat-soon", "stat-info", "stat-today")))
+        check("渲染出的轨道标签用上了颜色类",
+              html.count("tg tg-") >= 20, str(html.count("tg tg-")))
+        check("旧主题的主色残留已清理",
+              "rgba(47,111,235" not in css and "#f5f6f8" not in css and "#1f3a8a" not in css)
         out = pe.ROOT / "exports" / "selftest-temporal.md"
         out.parent.mkdir(exist_ok=True)
         out.write_text(rd.render_day_markdown(plan, day), encoding="utf-8")
@@ -421,7 +481,15 @@ def main() -> int:
             check("POST /api/toggle 写入成功", js.get("ok") is True, str(js))
             with urllib.request.urlopen(f"http://127.0.0.1:{srv_port}/api/day", timeout=3) as r:
                 js2 = json.loads(r.read().decode("utf-8"))
-            check("GET /api/day 返回当天任务", js2.get("date") == "2026-09-30" and len(js2["tasks"]) > 3)
+            # 不带参数时返回"今天"（服务跨夜也不会返回过期日期）；再显式查一次固定日期
+            with urllib.request.urlopen(
+                    f"http://127.0.0.1:{srv_port}/api/day?date=2026-09-30", timeout=3) as r:
+                js3 = json.loads(r.read().decode("utf-8"))
+            check("GET /api/day 默认返回当天任务",
+                  js2.get("date") == pe.today(plan).isoformat() and len(js2["tasks"]) > 3,
+                  str(js2.get("date")))
+            check("GET /api/day?date= 可查指定日期",
+                  js3.get("date") == "2026-09-30" and len(js3["tasks"]) > 3, str(js3.get("date")))
 
         print(f"\n临时目录：{tmp}")
     finally:

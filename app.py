@@ -445,6 +445,7 @@ def cmd_report_serve(args) -> int:
     plan = pe.load_plan()
     day = pe.parse_date(args.date) if getattr(args, "date", None) else pe.today(plan)
     rd.write_dashboard(plan, day)
+    rendered = {"date": day}  # 记着页面是按哪一天渲染的，跨夜时重算
     root = ROOT
 
     class Handler(BaseHTTPRequestHandler):
@@ -462,11 +463,16 @@ def cmd_report_serve(args) -> int:
         def do_GET(self):
             path, _, query = self.path.partition("?")
             if path in ("/", "/index.html", "/dashboard.html"):
+                # 服务可能跨夜运行：日期变了就重算一次页面，避免第二天还在展示昨天的清单
+                today_now = pe.today(pe.load_plan())
+                if today_now != rendered["date"] and not getattr(args, "date", None):
+                    rd.write_dashboard(pe.load_plan(), today_now)
+                    rendered["date"] = today_now
                 data = DASH.read_bytes()
                 return self._send(200, data, "text/html; charset=utf-8")
             if path == "/api/day":
                 pl = pe.load_plan()
-                d = day
+                d = day if getattr(args, "date", None) else pe.today(pl)
                 # 允许 ?date=YYYY-MM-DD 查询任意一天，便于核对未来/历史清单
                 wanted = ""
                 for pair in query.split("&"):

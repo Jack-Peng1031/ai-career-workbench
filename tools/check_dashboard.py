@@ -63,12 +63,38 @@ def main() -> int:
 
     # 卡片与交互元素
     check("卡片数量合理", html.count('class="card"') >= 7, str(html.count('class="card"')))
+    today_sec = html.split('id="today"')[1].split('id="week"')[0]
     n_tasks = len(pe.tasks_for_day(plan, pe.today(plan)))
-    check("勾选框与任务数一致", html.count('class="check"') == n_tasks,
-          f"{html.count('class=\"check\"')} vs {n_tasks}")
+    check("今日清单勾选框与任务数一致", today_sec.count('class="check"') == n_tasks,
+          f"{today_sec.count('class=\"check\"')} vs {n_tasks}")
     check("内嵌 bootstrap 数据可解析",
           bool(json.loads(re.search(r'<script id="bootstrap" type="application/json">(.*?)</script>',
                                     html, re.S).group(1))))
+
+    # 本周全景：条带 7 格 + 逐日清单
+    strip = html.split('class="wk-panel"')[0]
+    check("本周全景条带是 7 个格子（不会撑坏 7 列布局）",
+          strip.count('class="wk-cell') == 7, str(strip.count('class="wk-cell')))
+    check("条带下面铺开了 14 天的具体清单",
+          html.count('class="wk-day') == 14, str(html.count('class="wk-day')))
+    check("每一天的清单里都有任务标题",
+          html.count('class="wk-tt"') >= 50, str(html.count('class="wk-tt"')))
+    check("今天与明天默认展开",
+          len(re.findall(r'data-date="[0-9-]+" open', html)) == 2,
+          str(len(re.findall(r'data-date="[0-9-]+" open', html))))
+    check("本周全景的展开/收起开关唯一",
+          html.count('id="wk-toggle"') == 1 and "toggleWeekDays" in html)
+
+    # 主题：层次与语义色
+    check("主题含主色与语义色", all(v in html for v in
+          ("--primary:#2f5fd0", "--ok:", "--warn:", "--danger:")))
+    check("主题含表面层级", all(v in html for v in ("--sunken:", "--panel-2:", "--raised:")))
+    check("深色模式两套（媒体查询 + 卡片底色）",
+          html.count("prefers-color-scheme:dark") >= 2, str(html.count("prefers-color-scheme:dark")))
+    check("轨道标签带颜色类", html.count("tg tg-") >= 20, str(html.count("tg tg-")))
+    check("时间线里没有省略号截断的规则",
+          not [r for r in rd.CSS.split("}") if "ul.tl" in r.split("{")[0]
+               and ("ellipsis" in r or "nowrap" in r) and ".tlmeta" not in r])
 
     # 内联脚本语法（node --check）
     if NODE.exists():

@@ -86,7 +86,7 @@ python app.py serve --port 8765     # 然后浏览器打开 http://127.0.0.1:876
 | `python app.py materials [--guide]` | 看材料库与待补充清单与格式要求 |
 | `python app.py serve --port 8765` | 本地可视化工作台（可勾选、可加/删自定义任务，自动存盘） |
 
-自检：`python tools/selftest.py`（81 项），`python tools/check_dashboard.py`（页面与 JS 检查）。
+自检：`python tools/selftest.py`（111 项），`python tools/check_dashboard.py`（页面与 JS 检查）。
 
 ### 网页端「自定义任务」
 
@@ -136,6 +136,39 @@ python app.py deltask c9316fe62
 - **任务标题永远完整显示**：占满整行、需要就换行，不会出现 `后半部分被省略号截掉`；
 - 超过 12 天的部分默认不出，点顶部「展开/收起全部日期」一次性放出；
 - 标题右侧显示总天数，例如「点日期展开 · 共 24 天」。
+
+### 「本周全景」：条带 + 每一天的具体清单
+
+左栏第二张卡片不再只有 7 个格子（以前下面是一大片空白，还得自己去翻）：
+
+- **上面 7 个格子是概览**：每格显示 `星期 / 日期 / 还有几天 / N 课 · M 任务`，
+  底部小柱条＝当天自主任务的完成比例，一眼看出哪天最重、哪天拖着没做；
+- **下面直接铺开这一周 + 往后一周（14 天）的完整清单**，按周分段（中间虚线分隔）：
+  - 每一天是一个可折叠块，摘要行写 `10-08 周四 · 后天 · 3 门课 · 7 项 · 205 分钟 · 完成 0/7`；
+  - **今天与明天默认展开**，其余收起；点顶部「展开全部日期」一次性放出；
+  - 展开后是那天的具体任务（课程、讲座、日常任务、自定义、关键日期都在），
+    与「今日清单」同源，所以两处说法永远一致；
+  - 任务带**彩色轨道标签**（绩点/代码/英语/科研/课程/阶段/自定义）与状态胶囊（已完成/今天/临近）；
+- **点条带里的日期数字**直接跳到那一天并高亮，不用自己找。
+
+> 这一块是**静态渲染**进 `dashboard.html` 的（不依赖接口），所以直接双击打开网页也能看，
+> 传到 PythonAnywhere 后同样可用。
+
+### 主题与配色（层次 + 提示）
+
+页面用一套 CSS 变量管配色，改 `render_dashboard.py` 顶部的 `CSS` 即可整体换色：
+
+| 变量 | 作用 |
+|---|---|
+| `--bg / --sunken / --panel / --panel-2 / --raised` | 五层表面：页面底 → 下沉 → 卡片 → 卡片内层 → 浮起 |
+| `--primary / --primary-deep / --primary-soft` | 主色，用于标题竖条、当前日期、链接、主按钮 |
+| `--ok / --warn / --danger / --info` | 语义色：完成=绿、提醒=琥珀、冲突/逾期=红、常规=蓝 |
+| `--gpa / --code / --english / --research / --class / --phase / --extra / --custom` | 各条线的专属色，任务左侧色条与标签同色 |
+
+**层次感**来自：顶栏渐变 + 光斑、卡片顶部渐隐色带、卡片标题「有色底 + 下边线 + 左侧主色竖条」、
+五行分层背景、进度条/柱条统一圆角。**提示作用**来自：语义色胶囊（今天/明天/N 天后/已完成）、
+完成度低于 50% 的柱条明显偏空、时间线上今天用主色高亮。
+深色模式（`prefers-color-scheme:dark`）另有一套变量，不要只改亮色。
 
 ---
 
@@ -224,12 +257,70 @@ ai-career-workbench/
 │   └── cache/days/        未来 120 天清单快照（自动生成）
 ├── records/               你写东西的地方（刷题日志、生词本、模考记录、复盘）
 ├── exports/               导出的打卡清单 + 每日 todo 快照
-└── tools/                 PDF 抽取、自检、产物检查脚本
+├── tools/                 PDF 抽取、自检、产物检查、PythonAnywhere 同步脚本
+├── syncPA.bat / syncPA.ps1  一键「本地 ↔ PythonAnywhere」同步（双击即用）
+└── gitpush.bat            一键 git 提交并推送
 ```
 
 **关于端口：** 服务默认用 8765。如果该端口已被占用，它会自动顺延到 8766 并在控制台
 打印一行提示——**以打印出来的那个地址为准**。服务是"独占端口"的，同一端口不会出现两个
 进程同时监听（否则页面会随机显示旧内容）。
+
+---
+
+## 五之二、GitHub + PythonAnywhere 部署与同步
+
+两条独立的通道，**别混**：
+
+| 通道 | 管什么 | 命令 |
+|---|---|---|
+| Git | 版本历史（代码、计划、材料、生成物） | `gitpush.bat`（双击）或 `git push` |
+| PythonAnywhere | 线上那份实际文件（`https://JackPeng.pythonanywhere.com/`） | `syncPA.bat`（双击）或 `python tools/pa_sync.py push` |
+
+### 首次配置（只做一次）
+
+```powershell
+python tools/pa_sync.py setup     # 生成密钥并打印公钥
+```
+
+把打印出来的那一行公钥粘到 PythonAnywhere：
+**登录 → 右上角 `Account` → 页面里的 `SSH keys` 小节 → 新建并保存**。
+粘好后验证：
+
+```powershell
+python tools/pa_sync.py check     # 应显示「SSH 认证通过」并列出远端文件
+```
+
+> 不想开 SSH 也可以：在 `Account → API token` 拿一个 token，写进项目根目录的
+> `.pa_sync.json`（该文件已在 `.gitignore` 里，不会进仓库）：
+> ```json
+> {"user": "JackPeng", "remote_dir": "ai-career-workbench",
+>  "token": "你的token", "domain": "JackPeng.pythonanywhere.com"}
+> ```
+> 之后用 `python tools/pa_sync.py push --api` 走 Files API（无需 SSH），
+> `python tools/pa_sync.py reload` 还能远程触发 Reload。
+
+### 日常用法（`syncPA.bat` 双击即可）
+
+| 菜单 | 等价命令 | 作用 |
+|---|---|---|
+| 1 | `pa_sync.py check` | 检查认证、远端目录、两边文件数 |
+| 2 | `pa_sync.py diff` | 只看差异，**不修改任何文件** |
+| 3 | `pa_sync.py push` | 本地 → PythonAnywhere |
+| 4 | `pa_sync.py push --reload` | 上传 + 重新加载 Web App |
+| 5 | `pa_sync.py pull` | PythonAnywhere → 本地（会覆盖本地同名文件） |
+| 6 | `pa_sync.py setup` | 显示 SSH 公钥 |
+| 7 | `pa_sync.py reload` | 只重新加载 Web App |
+
+不同步的目录：`state/`、`logs/`、`exports/`、`records/`、`__pycache__`、`.git/`
+——即"本机运行数据"不上传；打卡记录始终以本机 `state/completions.json` 为准。
+
+> **静态挂载 vs WSGI/Flask**：如果 PythonAnywhere 上只是把 `dashboard.html` 当静态文件映射到
+> URL，那么 `push` 之后**刷新浏览器就能看到新版**，不用 Reload；
+> 如果挂的是 Flask/WSGI 应用，`push` 后需要点一次 Web 标签页的 **Reload**（或按菜单 7）。
+> 本页面的「本周全景逐日清单」「自定义任务表单」是**内联渲染**的，静态挂载也能正常显示；
+> 但左栏的**勾选存档**与**增删自定义任务**依赖本地服务接口（`python app.py serve`），
+> 在纯静态网站上点击会提示"未保存"——这是预期行为，不是 bug。
 
 ---
 
@@ -313,5 +404,4 @@ ai-career-workbench/
 - 竞赛报名时间、保研名额与加分细则，**一律以四川大学教务处、学院及赛事官网当年正式通知为准**；
   `plan.json` 里的日期是"预估 + 提醒"，拿到正式通知就改。
 - `state/completions.json` 是唯一状态文件；想清零重来，删掉它即可。
-- 所有数据都在本地，不上传任何服务器。
-"# ai-career-workbench" 
+- 所有数据都在本地，不上传任何服务器（除了你自己部署的那份 GitHub / PythonAnywhere 副本）。

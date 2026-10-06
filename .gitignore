@@ -1,4 +1,13 @@
-﻿state/cache/
+state/
+logs/
 exports/
+records/
 __pycache__/
 *.pyc
+
+# PythonAnywhere 同步：Token 与私钥路径属于本机配置，不进仓库
+.pa_sync.json
+.pa_sync_stamp
+
+# 生成启动脚本的临时工具（syncPA.bat / syncPA.ps1 才是正式产物）
+tools/_make_launchers.py
