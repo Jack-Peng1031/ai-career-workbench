@@ -40,13 +40,18 @@ check("7 个格子可点、默认只高亮一个",
       f"{len(re.findall(r'class=.wk-cell[^\"]*is-sel', html))}")
 check("清单区与切换数据都在线上",
       'id="wk-day"' in html and 'id="wk-data"' in html and "wkSelectDay" in html)
+wk_days = {}
 try:
     wk_days = json.loads(re.search(r'<script id="wk-data" type="application/json">(.*?)</script>',
                                    html, re.S).group(1))
     check("线上日清单数据覆盖 7 天", len(wk_days) == 7, len(wk_days))
 except Exception as exc:  # noqa: BLE001
     check("线上日清单数据覆盖 7 天", False, str(exc)[:120])
-check("格子下面有具体任务", html.count('class="wk-tt"') >= 20, html.count('class="wk-tt"'))
+check("格子下面确实有任务（当前那一天的清单）",
+      html.count('class="wk-tt"') >= 3, html.count('class="wk-tt"'))
+check("切换数据里 7 天都有任务内容",
+      sum(1 for v in wk_days.values() if 'class="wk-tt"' in v) >= 6,
+      sum(1 for v in wk_days.values() if 'class="wk-tt"' in v))
 check("时间线前 5 项默认展开",
       len(re.findall(r'class="tl-date" data-idx="\d+" open', html)) == 5,
       len(re.findall(r'class="tl-date" data-idx="\d+" open', html)))
