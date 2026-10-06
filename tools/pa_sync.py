@@ -42,6 +42,7 @@ import shutil
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -105,7 +106,8 @@ def local_files() -> list[Path]:
             continue
         if rel.name in EXCLUDE_FILES or rel.suffix.lower() in EXCLUDE_SUFFIX:
             continue
-        if rel.name.startswith("_shot") or rel.name.startswith("_devcheck"):
+        # `_` 前缀 = 本机临时/调试文件（与 materials/ 的约定一致），不上传
+        if rel.name.startswith("_"):
             continue
         out.append(rel)
     return out
@@ -222,63 +224,90 @@ class ApiSync:
             raise Fail("没有 API Token：请在 .pa_sync.json 里填 token，或先配置 SSH 公钥")
         self.base = f"https://www.pythonanywhere.com/api/v0/user/{self.user}/files/path"
 
-    def _req(self, url: str, data: bytes | None = None, method: str | None = None):
-        req = urllib.request.Request(url, data=data, method=method,
-                                     headers={"Authorization": "Token " + self.token})
-        if data is not None and method is None:
-            req.add_header("Content-Type", "application/octet-stream")
+    # —— 基础请求 ——
+    def _open(self, url: str, data=None, method: str | None = None,
+              ctype: str | None = None, timeout: int = 120):
+        headers = {"Authorization": "Token " + self.token}
+        if ctype:
+            headers["Content-Type"] = ctype
+        req = urllib.request.Request(url, data=data, method=method, headers=headers)
         try:
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.status, r.read()
         except urllib.error.HTTPError as exc:
             return exc.code, exc.read()
         except urllib.error.URLError as exc:
             raise Fail("连不上 PythonAnywhere API：" + str(exc.reason)) from exc
 
+    def ping(self) -> str:
+        """验证 token 有效并读一下 CPU 配额。"""
+        url = f"https://www.pythonanywhere.com/api/v0/user/{self.user}/cpu/"
+        status, body = self._open(url, timeout=30)
+        if status != 200:
+            raise Fail(f"API Token 无效或不可用（HTTP {status}）："
+                       + body[:160].decode("utf-8", "replace"))
+        try:
+            data = json.loads(body.decode("utf-8"))
+            return (f"Token 有效　今日 CPU {data['daily_cpu_total_usage_seconds']}"
+                    f"/{data['daily_cpu_limit_seconds']} 秒")
+        except Exception:  # noqa: BLE001
+            return "Token 有效"
+
     def remote_path(self, rel: str) -> str:
         home = f"/home/{self.user}"
         parts = [p for p in str(self.cfg["remote_dir"]).strip("/").split("/") if p]
         return "/".join([home] + parts + [rel.replace("\\", "/")])
 
+    def url_for(self, rel: str) -> str:
+        # 路径里可能有中文（materials/讲座.txt），HTTP 要求百分号编码
+        return self.base + urllib.parse.quote(self.remote_path(rel), safe="/")
+
+    def exists(self, rel: str) -> bool:
+        status, _ = self._open(self.url_for(rel), timeout=60)
+        return status == 200
+
     def upload(self, rel: Path) -> None:
         """Files API 要求 multipart 表单，字段名固定为 content（附带的文件名会被忽略）。"""
-        url = self.base + self.remote_path(str(rel))
         body, ctype = _multipart("content", Path(rel).name, (ROOT / rel).read_bytes())
-        req = urllib.request.Request(
-            url, data=body, method="POST",
-            headers={"Authorization": "Token " + self.token, "Content-Type": ctype})
-        try:
-            with urllib.request.urlopen(req, timeout=90) as r:
-                status = r.status
-        except urllib.error.HTTPError as exc:
-            detail = exc.read()[:200].decode("utf-8", "replace")
-            raise Fail(f"上传 {rel} 失败（HTTP {exc.code}）：{detail}") from exc
-        # 201 = 新建，200 = 覆盖已有文件
+        status, resp = self._open(self.url_for(str(rel)), data=body, method="POST",
+                                  ctype=ctype, timeout=180)
         if status not in (200, 201):
-            raise Fail(f"上传 {rel} 失败（HTTP {status}）")
+            raise Fail(f"上传 {rel} 失败（HTTP {status}）："
+                       + resp[:200].decode("utf-8", "replace"))
 
     def download(self, rel: str) -> bytes:
-        status, body = self._req(self.base + self.remote_path(rel))
+        status, body = self._open(self.url_for(rel))
         if status != 200:
             raise Fail(f"下载 {rel} 失败（HTTP {status}）")
         return body
 
+    def tree(self, sub: str = "") -> list[str]:
+        path = self.remote_path(sub) + ("/" if sub else "")
+        url = (f"https://www.pythonanywhere.com/api/v0/user/{self.user}"
+               f"/files/tree/?path=" + urllib.parse.quote(path, safe="/"))
+        status, body = self._open(url, timeout=60)
+        if status != 200:
+            raise Fail(f"列目录失败（HTTP {status}）")
+        return json.loads(body.decode("utf-8"))
+
 
 def reload_webapp(cfg: dict) -> str:
-    """让 PythonAnywhere 重新加载 Web App。只有配了 token 才能远程触发。"""
+    """让 PythonAnywhere 重新加载 Web App（WSGI/Flask 应用改了代码必须做这一步）。"""
     if not cfg.get("token"):
         return ("没配 API Token，无法远程 reload。\n"
                 "  纯静态文件（dashboard.html）不需要 reload，刷新页面即可；\n"
                 "  如果你挂的是 WSGI/Flask 应用，请在 Web 标签页点一次 Reload。")
-    domain = cfg.get("domain") or (str(cfg["user"]) + ".pythonanywhere.com")
-    url = f"https://www.pythonanywhere.com/api/v0/user/{cfg['user']}/webapps/{domain}/reload/"
+    domain = str(cfg.get("domain") or (str(cfg["user"]) + ".pythonanywhere.com")).lower()
+    url = (f"https://www.pythonanywhere.com/api/v0/user/{cfg['user']}"
+           f"/webapps/{domain}/reload/")
     req = urllib.request.Request(url, data=b"", method="POST",
                                  headers={"Authorization": "Token " + cfg["token"]})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             return f"已通知 PythonAnywhere 重新加载 {domain}（HTTP {r.status}）。"
     except urllib.error.HTTPError as exc:
-        return (f"reload 失败（HTTP {exc.code}）：{exc.read()[:200].decode('utf-8', 'replace')}\n"
+        detail = exc.read()[:200].decode("utf-8", "replace")
+        return (f"reload 失败（HTTP {exc.code}）：{detail}\n"
                 "  请到 Web 标签页手动点一次 Reload。")
     except urllib.error.URLError as exc:
         return "reload 失败（网络）：" + str(exc.reason)
@@ -339,6 +368,23 @@ def cmd_check(cfg: dict, args) -> int:
     print(f"远端目录　：~/{cfg['remote_dir']}")
     print(f"私钥　　　：{cfg['key']}　{'存在' if Path(cfg['key']).exists() else '不存在（将退化为密码登录）'}")
     print(f"API Token ：{'已配置' if cfg.get('token') else '未配置'}")
+
+    if args.api:
+        banner("API 通道检查")
+        api = ApiSync(cfg)
+        print("　" + api.ping())
+        print(f"远端目录 ：{api.remote_path('')}")
+        try:
+            files = [x for x in api.tree() if not x.endswith("/")]
+            print(f"远端文件 ：{len(files)} 个")
+        except Fail as exc:
+            print("列目录失败：" + str(exc))
+        local = local_files()
+        print(f"本地待同步：{len(local)} 个文件，共 "
+              f"{human(sum((ROOT / f).stat().st_size for f in local))}")
+        print("　执行 python tools/pa_sync.py push --api 上传（--reload 顺带重载）")
+        return 0
+
     sync = SSHSync(cfg)
     ok, out = sync.check()
     if not ok:
@@ -406,9 +452,18 @@ def cmd_push(cfg: dict, args) -> int:
             raise Fail("--api 需要 API Token")
         banner(f"API 上传 {len(files)} 个文件（{human(total)}）")
         api = ApiSync(cfg)
+        print("　" + api.ping())
+        remote: set[str] = set()
+        try:
+            remote = {x[len(api.remote_path("")) + 1:] for x in api.tree() if not x.endswith("/")}
+            new = [f for f in files if str(f).replace("\\", "/") not in remote]
+            print(f"　远端现有 {len(remote)} 个文件，本次新增 {len(new)} 个")
+        except Fail as exc:
+            print("　（列目录失败，不做新旧对比：" + str(exc) + "）")
         for i, rel in enumerate(files, 1):
             api.upload(rel)
-            print(f"  [{i}/{len(files)}] {rel}")
+            print(f"  [{i}/{len(files)}] {rel}　{human((ROOT / rel).stat().st_size)}")
+        print(f"\n完成：{len(files)} 个文件 → {api.remote_path('')}/")
     else:
         banner(f"SSH 上传 {len(files)} 个文件（{human(total)}）")
         sync = SSHSync(cfg)
@@ -491,7 +546,9 @@ def main(argv=None) -> int:
 
     add("setup", "生成/显示 SSH 公钥并给出配置步骤").set_defaults(func=cmd_setup)
     add("keyfile", "打印可直接粘进 PythonAnywhere 控制台的一行命令").set_defaults(func=cmd_keyfile)
-    add("check", "检查连通性、认证与远端目录").set_defaults(func=cmd_check)
+    p = add("check", "检查连通性、认证与远端目录")
+    p.add_argument("--api", action="store_true", help="改查 Files API 通道（需要 token）")
+    p.set_defaults(func=cmd_check)
     add("diff", "只看差异，不做修改").set_defaults(func=cmd_diff)
     p = add("push", "本地 → PythonAnywhere")
     p.add_argument("--api", action="store_true", help="改用 Files API（需要 token）")

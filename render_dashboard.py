@@ -475,42 +475,79 @@ def _base_title(s) -> str:
     return re.sub(r"（[^（）]*）\s*$", "", str(s or "").strip()).strip()
 
 
-def _day_items(plan: dict, base: dt.date, days: int, with_classes: bool) -> dict:
+def _event_item(iso: str, ev: dict) -> dict:
+    """一次性固定事项（讲座/开放日）→ 与 tasks_for_day 里同形状的任务项。"""
+    return {
+        "key": pe.task_key(pe.parse_date(iso), ev["id"]),
+        "template_id": None,
+        "kind": "event",
+        "track": ev.get("track", "research"),
+        "title": f"{ev['title']}（{ev.get('periods','')}）",
+        "minutes": int(ev.get("minutes", 0)),
+        "steps": ev.get("steps", []),
+        "proof": ev.get("proof", ""),
+        "note": ev.get("note", ""),
+        "unit": ev.get("unit", "次"),
+        "done": False,
+    }
+
+
+def _keydate_item(iso: str, k: dict) -> dict:
+    return {
+        "key": "keydate::" + iso + "::" + str(k.get("title", "")),
+        "kind": "keydate",
+        "track": "phase",
+        "title": k.get("title", ""),
+        "minutes": 0,
+        "steps": [k["action"]] if k.get("action") else [],
+        "proof": "",
+        "note": str(k.get("kind", "") or ""),
+        "done": False,
+    }
+
+
+def _day_items(plan: dict, base: dt.date, days: int, with_classes: bool,
+               kinds: tuple = ("class", "event", "task", "phase", "custom", "extra")) -> dict:
     """按日期收集"要盯的事"。
 
     与「今日清单」同源，保证页面上两处说法一致：
-      课程 + 一次性固定事项（讲座/开放日）= people.tasks_for_day 的前两类；
-      关键日期（考试、报名窗口等）与自定义任务单独补进来，并按基础标题去重，
+      课程 + 一次性固定事项（讲座/开放日）= pe.tasks_for_day 的前两类；
+      关键日期（考试、报名窗口等）单独补进来，并按基础标题去重，
       避免"教授开放日 · 蒲亦非"既在固定事项里出现、又被 key_dates 再算一次。
+
+    kinds 用来收窄范围：右栏时间线跨 400 天，只需要 class/event，
+    这时绕开 task_templates 的逐日编译（20 个模板 × 400 天，白烧 CPU）。
     """
     out: dict[str, dict] = {}
     WDC = pe.WEEKDAY_CN
+    plan_keydates = plan.get("key_dates", [])
+
     for i in range(days):
         d = base + dt.timedelta(days=i)
         iso = d.isoformat()
         seen, items = set(), []
-        for t in pe.tasks_for_day(plan, d):
-            if t["kind"] == "class" and not with_classes:
-                continue
-            seen.add(_base_title(t["title"]))
-            items.append(t)
-        for k in plan.get("key_dates", []):
+
+        if kinds == ("event",):
+            # 最快路径：固定事项只按日期匹配，完全不用编译模板
+            for ev in pe.fixed_events_on(plan, d):
+                item = _event_item(iso, ev)
+                seen.add(_base_title(item["title"]))
+                items.append(item)
+        else:
+            for t in pe.tasks_for_day(plan, d):
+                if t["kind"] not in kinds:
+                    continue
+                seen.add(_base_title(t["title"]))
+                items.append(t)
+
+        for k in plan_keydates:
             if str(k.get("date", "")) != iso:
                 continue
             if _base_title(k.get("title", "")) in seen:
                 continue
             seen.add(_base_title(k.get("title", "")))
-            items.append({
-                "key": "keydate::" + iso + "::" + str(k.get("title", "")),
-                "kind": "keydate",
-                "track": "phase",
-                "title": k.get("title", ""),
-                "minutes": 0,
-                "steps": [k["action"]] if k.get("action") else [],
-                "proof": "",
-                "note": str(k.get("kind", "") or ""),
-                "done": False,
-            })
+            items.append(_keydate_item(iso, k))
+
         out[iso] = {"date": d, "week": pe.semester_week(plan, d), "weekday": WDC[d.weekday()],
                     "items": items}
     return out
@@ -653,7 +690,7 @@ def render_timeline(plan: dict, base: dt.date, max_days: int = 16, fold_after: i
         rows.append((date_s, bucket, seq, tag, title, detail, track))
 
     # 与今日清单同源的一次性事项（讲座/开放日）；span_days 覆盖到明年，与 until 对齐
-    events = _day_items(plan, base, span_days, with_classes=False)
+    events = _day_items(plan, base, span_days, with_classes=False, kinds=("event",))
     # 关键日期里的讲座（教授开放日）与 fixed_events 是同一件事，按基础标题去重，
     # 避免同一天同一个活动在时间线里出现两次。
     fixed_seen = {iso: {_base_title(t["title"]) for t in rec["items"]}

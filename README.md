@@ -314,6 +314,21 @@ python tools/pa_sync.py check     # 应显示「SSH 认证通过」并列出远�
 
 不同步的目录：`state/`、`logs/`、`exports/`、`records/`、`__pycache__`、`.git/`
 ——即"本机运行数据"不上传；打卡记录始终以本机 `state/completions.json` 为准。
+以 `_` 开头的文件（本机调试用的临时脚本）也不会被上传。
+
+不带 SSH 也能用：`python tools/pa_sync.py check --api` 验证 token，
+`push --api` 走 Files API 逐文件上传。**线上是 WSGI 应用**（`wsgi_standalone.py` + Python 3.10），
+所以 `push` 完要用 `reload` 让改动生效。
+
+推完想知道线上到底对不对，跑一条命令即可（会拉真实页面与接口来验）：
+
+```powershell
+python tools/verify_deploy.py      # 线上页面/接口自检：14 个逐日清单块、主题变量、/api/day
+```
+
+> 该脚本校验的是 `https://jackpeng.pythonanywhere.com/`：首页是否为新版、
+> 「本周全景」是否铺开了 14 天逐日清单、新主题变量是否生效、
+> `/api/day` 与 `/api/day?date=...` 是否正常、有没有乱码。
 
 > **静态挂载 vs WSGI/Flask**：如果 PythonAnywhere 上只是把 `dashboard.html` 当静态文件映射到
 > URL，那么 `push` 之后**刷新浏览器就能看到新版**，不用 Reload；
