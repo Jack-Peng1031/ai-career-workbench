@@ -201,6 +201,18 @@ class SSHSync:
 # --------------------------------------------------------------------------
 # Files API 通道（没有 SSH 也能用）
 # --------------------------------------------------------------------------
+def _multipart(field: str, filename: str, data: bytes) -> tuple[bytes, str]:
+    """手搓 multipart/form-data（标准库没有，而 PythonAnywhere 的 Files API 只认这个）。"""
+    boundary = "----pa-sync-" + os.urandom(12).hex()
+    head = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="{field}"; filename="{filename}"\r\n'
+        "Content-Type: application/octet-stream\r\n\r\n"
+    ).encode("utf-8")
+    tail = f"\r\n--{boundary}--\r\n".encode("utf-8")
+    return head + data + tail, "multipart/form-data; boundary=" + boundary
+
+
 class ApiSync:
     def __init__(self, cfg: dict):
         self.cfg = cfg
@@ -229,10 +241,21 @@ class ApiSync:
         return "/".join([home] + parts + [rel.replace("\\", "/")])
 
     def upload(self, rel: Path) -> None:
+        """Files API 要求 multipart 表单，字段名固定为 content（附带的文件名会被忽略）。"""
         url = self.base + self.remote_path(str(rel))
-        status, body = self._req(url, data=(ROOT / rel).read_bytes(), method="POST")
+        body, ctype = _multipart("content", Path(rel).name, (ROOT / rel).read_bytes())
+        req = urllib.request.Request(
+            url, data=body, method="POST",
+            headers={"Authorization": "Token " + self.token, "Content-Type": ctype})
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                status = r.status
+        except urllib.error.HTTPError as exc:
+            detail = exc.read()[:200].decode("utf-8", "replace")
+            raise Fail(f"上传 {rel} 失败（HTTP {exc.code}）：{detail}") from exc
+        # 201 = 新建，200 = 覆盖已有文件
         if status not in (200, 201):
-            raise Fail(f"上传 {rel} 失败（HTTP {status}）：{body[:200].decode('utf-8', 'replace')}")
+            raise Fail(f"上传 {rel} 失败（HTTP {status}）")
 
     def download(self, rel: str) -> bytes:
         status, body = self._req(self.base + self.remote_path(rel))
@@ -264,23 +287,48 @@ def reload_webapp(cfg: dict) -> str:
 # --------------------------------------------------------------------------
 # 子命令
 # --------------------------------------------------------------------------
-def cmd_setup(cfg: dict, args) -> int:
-    banner("配置 SSH 公钥（做一次就够，之后免密同步）")
+def _public_key(cfg: dict, create: bool = True) -> str:
+    """读（必要时生成）公钥内容。"""
     key = Path(cfg["key"])
     if not key.exists():
-        print("本地还没有这个密钥，正在生成：" + str(key))
+        if not create:
+            raise Fail("还没有密钥：" + str(key) + "，先运行 python tools/pa_sync.py setup")
         key.parent.mkdir(parents=True, exist_ok=True)
         code, out = _run(["ssh-keygen", "-t", "ed25519", "-f", str(key),
                           "-N", '""', "-C", f"{cfg['user']}@pythonanywhere"], timeout=60)
         if not key.exists():
-            print("生成失败：" + out)
-            return 1
-    pub = Path(str(key) + ".pub").read_text(encoding="utf-8").strip()
-    print("1) 打开： https://www.pythonanywhere.com/user/" + str(cfg["user"]) + "/account/sshkeys/")
-    print("2) 把下面这一整行粘进去并保存（Key 名字随便写，例如 local-workbench）：\n")
+            raise Fail("生成密钥失败：" + out)
+    return Path(str(key) + ".pub").read_text(encoding="utf-8").strip()
+
+
+def cmd_setup(cfg: dict, args) -> int:
+    banner("配置 SSH 公钥（做一次就够，之后免密同步）")
+    pub = _public_key(cfg)
+    key = Path(cfg["key"])
+    print("注：PythonAnywhere 的 SSH 需要付费账号（help.pythonanywhere.com/pages/SSHAccess）。")
+    print("    免费账号请改用「控制台粘贴」（菜单 8 / python tools/pa_sync.py keyfile）")
+    print("    或 API Token 通道（--api），两者都不需要 SSH。\n")
+    print("方式 A · 网页版（付费账号）")
+    print("  打开账号页： https://www.pythonanywhere.com/account/")
+    print("  找到「SSH keys」小节，把下面这一整行粘进去并保存（名字随便写）：\n")
     print("   " + pub + "\n")
-    print("3) 回来运行： python tools/pa_sync.py check")
-    print("\n提示：公钥可以公开，私钥（" + str(key) + "）不要发给任何人。")
+    print("方式 B · 控制台（免费账号也能用，推荐）")
+    print("  运行 python tools/pa_sync.py keyfile，把打印出来的那一行贴进 Bash 控制台。")
+    print("\n粘好后运行： python tools/pa_sync.py check")
+    print("提示：公钥可以公开，私钥（" + str(key) + "）不要发给任何人。")
+    return 0
+
+
+def cmd_keyfile(cfg: dict, args) -> int:
+    """打印可以直接粘进 PythonAnywhere Bash 控制台的一行命令。"""
+    pub = _public_key(cfg)
+    banner("把下面这一行整行粘进 PythonAnywhere 的 Bash 控制台并回车")
+    print(f"mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '{pub}' >> ~/.ssh/authorized_keys"
+          " && chmod 600 ~/.ssh/authorized_keys && echo 公钥已安装")
+    print("\n装好后回到本机运行： python tools/pa_sync.py check")
+    print("如果 check 仍报 Permission denied，说明你的账号是免费版（SSH 需付费）：")
+    print("  改走 API 通道 —— 到 https://www.pythonanywhere.com/account/#api_token 复制 Token，")
+    print("  填进 .pa_sync.json 的 token 字段，然后 python tools/pa_sync.py push --api")
     return 0
 
 
@@ -296,10 +344,14 @@ def cmd_check(cfg: dict, args) -> int:
     if not ok:
         print("\nSSH 未通过：")
         print("  " + out.replace("\n", "\n  "))
-        print("\n先做这一步：把公钥贴到 PythonAnywhere 的 SSH keys 页面，")
-        print("（python tools/pa_sync.py setup 会把公钥打印出来）")
-        if cfg.get("token"):
-            print("也可以先用 API 通道：python tools/pa_sync.py push --api")
+        print("\n两条路，任选一条：")
+        print("  A. 装公钥： python tools/pa_sync.py keyfile")
+        print("     （把打印的那一行粘进 PythonAnywhere 的 Bash 控制台；网页版在")
+        print("       https://www.pythonanywhere.com/account/ 的 SSH keys 小节）")
+        print("     注意：PythonAnywhere 的 SSH 只对付费账号开放。")
+        print("  B. 不用 SSH：到 https://www.pythonanywhere.com/account/#api_token 复制 Token，")
+        print("     填进项目根目录 .pa_sync.json 的 token 字段，然后")
+        print("       python tools/pa_sync.py push --api")
         return 1
     print("\nSSH 认证通过。")
     remote = sync.listing()
@@ -438,6 +490,7 @@ def main(argv=None) -> int:
         return p
 
     add("setup", "生成/显示 SSH 公钥并给出配置步骤").set_defaults(func=cmd_setup)
+    add("keyfile", "打印可直接粘进 PythonAnywhere 控制台的一行命令").set_defaults(func=cmd_keyfile)
     add("check", "检查连通性、认证与远端目录").set_defaults(func=cmd_check)
     add("diff", "只看差异，不做修改").set_defaults(func=cmd_diff)
     p = add("push", "本地 → PythonAnywhere")

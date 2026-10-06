@@ -44,6 +44,7 @@ echo   4. 上传并重新加载 Web App
 echo   5. 拉回：PythonAnywhere -^> 本地
 echo   6. 显示 SSH 公钥（首次配置用）
 echo   7. 通知 PythonAnywhere 重新加载 Web App
+echo   8. 打印公钥安装命令（免费账号走这里）
 echo   0. 退出
 echo.
 set /p SEL=请输入序号后回车:
@@ -57,6 +58,7 @@ if "%SEL%"=="4" ( %PYEXE% tools\pa_sync.py push --reload & goto DONE )
 if "%SEL%"=="5" ( %PYEXE% tools\pa_sync.py pull & goto DONE )
 if "%SEL%"=="6" ( %PYEXE% tools\pa_sync.py setup & goto DONE )
 if "%SEL%"=="7" ( %PYEXE% tools\pa_sync.py reload & goto DONE )
+if "%SEL%"=="8" ( %PYEXE% tools\pa_sync.py keyfile & goto DONE )
 if "%SEL%"=="0" ( exit /b 0 )
 echo [错误] 没有这个选项：%SEL%
 

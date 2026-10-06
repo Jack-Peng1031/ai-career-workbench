@@ -41,6 +41,7 @@ switch ($Action) {
         Write-Host '  5. 拉回：PythonAnywhere -> 本地'
         Write-Host '  6. 显示 SSH 公钥（首次配置用）'
         Write-Host '  7. 通知 PythonAnywhere 重新加载 Web App'
+        Write-Host '  8. 打印公钥安装命令（免费账号走这里）'
         Write-Host '  0. 退出'
         Write-Host ''
         $sel = Read-Host '请输入序号后回车'
@@ -52,6 +53,7 @@ switch ($Action) {
             '5' { Invoke-Sync @('pull') }
             '6' { Invoke-Sync @('setup') }
             '7' { Invoke-Sync @('reload') }
+            '8' { Invoke-Sync @('keyfile') }
             '0' { return }
             default { Write-Host "[错误] 没有这个选项：$sel" -ForegroundColor Red }
         }
