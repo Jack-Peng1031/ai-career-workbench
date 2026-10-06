@@ -228,15 +228,14 @@ ul.tl ul.tl-items .ti .sub{display:block;color:var(--muted);font-weight:400;font
 .wk-bar{height:5px;background:var(--sunken);border-radius:99px;margin-top:7px;overflow:hidden;width:100%}
 .wk-bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
 /* 选中那一天的事项：只有任务，不再重复日期/课程数/分钟数 */
-.wk-panel{margin-top:14px}
-.wk-day-card{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
-  padding:10px 14px 12px;scroll-margin-top:14px}
-.wk-day-card[hidden]{display:none}
+.wk-panel{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
+  padding:10px 14px 12px;scroll-margin-top:14px;transition:box-shadow .25s,border-color .25s}
+.wk-panel.hit{border-color:var(--primary);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 22%,transparent)}
 .wk-day-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:8px;
   border-bottom:1px solid var(--line-2);margin-bottom:2px;font-size:12.5px;color:var(--muted)}
 .wk-day-hd .d{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 .wk-caret{margin-left:auto;font-weight:600;color:var(--primary);font-size:11.8px}
-.wk-day.is-today{border-color:color-mix(in srgb,var(--primary) 45%,transparent)}
 .wk-items{list-style:none;margin:4px 0 0;padding:0}
 .wk-items > li{display:flex;gap:9px;align-items:flex-start;padding:8px 2px;border-top:1px solid var(--line-2)}
 .wk-items > li:first-child{border-top:0}
@@ -372,28 +371,27 @@ async function removeCustom(id){
   }
 }
 // —— 本周全景：点某个格子 → 下面换成那一天的事项 ——
-// 高亮用"先全部清掉、再给选中的那个加上"来保证一定切换（之前靠 :target/CSS 时点第二次不明显）。
+// 切的是"内容"（innerHTML），不是靠 7 张卡片里藏 6 张——这样"点了没反应"一眼就能看出来。
+// 每天的 HTML 由服务端预渲染放在 <script id="wk-data"> 里，纯前端切换、不联网。
 function wkSelectDay(iso, scroll){
   const card = document.getElementById('week');
-  if(!card || !iso){ return; }
-  const cells = card.querySelectorAll('.wk-cell');
-  cells.forEach(function(c){
+  const box = document.getElementById('wk-day');
+  const data = document.getElementById('wk-data');
+  if(!card || !box || !iso){ return; }
+  let html = '';
+  if(data){
+    try{ html = (JSON.parse(data.textContent) || {})[iso] || ''; }catch(e){ html = ''; }
+  }
+  card.querySelectorAll('.wk-cell').forEach(function(c){
     const on = (c.getAttribute('data-day') === iso);
     c.classList.toggle('is-sel', on);
     if(on){ c.setAttribute('aria-current', 'true'); } else { c.removeAttribute('aria-current'); }
   });
-  const days = card.querySelectorAll('.wk-day');
-  let hit = null;
-  days.forEach(function(d){
-    const on = (d.getAttribute('data-day') === iso);
-    if(on){ d.removeAttribute('hidden'); hit = d; } else { d.setAttribute('hidden', ''); }
-  });
-  if(hit && scroll){
-    hit.scrollIntoView({behavior:'smooth', block:'nearest'});
-  }
-  if(hit){
-    hit.classList.add('hit');
-    setTimeout(function(){ hit.classList.remove('hit'); }, 1200);
+  if(html){
+    box.innerHTML = html;
+    if(scroll){ box.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+    box.classList.add('hit');
+    setTimeout(function(){ box.classList.remove('hit'); }, 1200);
   }
 }
 (function(){
@@ -810,15 +808,19 @@ def render_custom_card(base: dt.date) -> str:
 
 
 def render_week_panel(plan: dict, base: dt.date, span_days: int = 7,
-                      open_days: int = 0, selected: str = "") -> tuple[str, int]:
+                      open_days: int = 0, selected: str = "") -> tuple[str, dict]:
     """「本周全景」：7 个可点的格子 + 下面只显示"选中的那一天"的事项。
 
     交互（用户指定）：点某一天的格子 → 下面立刻换成那一天的任务，格子本身高亮；
-    不再把整周 14 天的清单一次性铺开（那样太长），也不在事项里重复
-    日期/几门课/多少分钟这些格子已经表达过的信息——下面只留任务本身。
-      · 高亮由 JS 显式切换（先清后加），点第二次、来回点都不会失灵；
-      · 7 天的清单都渲染在页面里，切换是纯前端、不联网，静态托管同样可用。
-    返回 (HTML, 天数)。
+    不再把整周清单一次性铺开，也不在事项里重复日期/几门课/多少分钟（格子已经表达了）。
+
+    下面那块内容由 JS 用**预渲染好的 HTML 替换**（`<script id="wk-data">` 里的
+    日期 → 清单 HTML，见 render_dashboard 的 wk_data_json），所以：
+      · 切换是纯前端、不联网，静态托管同样可用；
+      · "点了没反应"这类问题只可能是内容真的没换，浏览器点一遍即可验证
+        （tools/click_test.py 就是干这个的）。
+
+    返回 (一周条带的 HTML, {"html": 选中那天的清单, "days": {日期: 清单}, "selected": 日期})。
     """
     first = base - dt.timedelta(days=base.weekday())
     span = max(1, min(span_days, 7))
@@ -847,7 +849,7 @@ def render_week_panel(plan: dict, base: dt.date, span_days: int = 7,
             classes.append("is-sel")
         aria = ' aria-current="true"' if iso == sel else ""
         cells.append(
-            '<a class="' + " ".join(classes) + '" href="#wk-panel" data-day="' + iso + '"' + aria
+            '<a class="' + " ".join(classes) + '" href="#week" data-day="' + iso + '"' + aria
             + ' title="' + esc(iso + "　" + str(courses) + " 门课 · " + str(len(real))
                                + " 项任务　点击查看这一天的事项") + '">'
             '<span class="wk-wd">' + esc(pe.WEEKDAY_CN[d.weekday()]) + '</span>'
@@ -857,28 +859,21 @@ def render_week_panel(plan: dict, base: dt.date, span_days: int = 7,
             '<span class="wk-bar"><i style="width:' + f"{pct:.0f}" + '%"></i></span></a>'
         )
 
-    # —— 选中的那一天：只列任务 ——
-    cards = []
+    # —— 每一天的清单（服务端预渲染，JS 直接换）——
+    day_html: dict[str, str] = {}
     for iso in dates:
         rec = info[iso]
-        d = rec["date"]
-        delta = (d - base).days
-        tasks = rec["items"]
-        body = "".join(render_mini_task(t) for t in tasks)
-        if body:
-            body = '<ul class="wk-items">' + body + "</ul>"
-        else:
-            body = '<div class="wk-empty">这一天没有安排。</div>'
+        delta = (rec["date"] - base).days
+        body = "".join(render_mini_task(t) for t in rec["items"])
+        body = ('<ul class="wk-items">' + body + "</ul>") if body else \
+            '<div class="wk-empty">这一天没有安排。</div>'
         hint = "今日" if delta == 0 else _when_label(delta)
-        cards.append(
-            '<div class="wk-day-card' + (" is-today" if delta == 0 else "") + '" data-day="' + iso
-            + '" id="wk-day-' + iso + '"' + ("" if iso == sel else " hidden") + '>'
+        day_html[iso] = (
             '<div class="wk-day-hd"><span class="d">' + esc(iso[5:] + " " + rec["weekday"])
             + '</span><span class="stat ' + ("stat-today" if delta == 0 else
                                             ("stat-soon" if 0 < delta <= 3 else "stat-info")) + '">'
             + esc(hint) + '</span>'
-            '<span class="wk-caret" title="事项已按日期分组，切换请点上面的格子">'
-            + "← 点上面的日期可切换</span></div>" + body + "</div>"
+            '<span class="wk-caret">← 点上面的日期可切换</span></div>' + body
         )
 
     same_week = [t for iso in dates for t in real_items(info[iso])]
@@ -890,7 +885,7 @@ def render_week_panel(plan: dict, base: dt.date, span_days: int = 7,
         + '本周 ' + str(len(same_week)) + " 项自主任务，已完成 " + str(week_done) + " 项 · 计划投入 "
         + str(week_min) + " 分钟（格子里的柱条＝该日完成比例）。</p>"
     )
-    return (strip + '<div class="wk-panel" id="wk-panel">' + "".join(cards) + "</div>"), len(dates)
+    return strip, {"html": day_html[sel], "days": day_html, "selected": sel}
 
 
 def render_day_markdown(plan: dict, day: dt.date) -> str:
@@ -1036,7 +1031,9 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         '</div>' + ring(pct, "今日完成") + '</div></header>'
     )
 
-    week_html, week_days = render_week_panel(plan, base)
+    week_html, week_data = render_week_panel(plan, base)
+    # 日清单数据交给前端切换用；</ 必须转义，否则会提前关掉 <script>
+    wk_data_json = json.dumps(week_data["days"], ensure_ascii=False).replace("</", "<\\/")
     left = (
         '<div class="grid" style="margin:0">'
         + render_day_card(base, week, tasks)
@@ -1045,10 +1042,20 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         '<p class="hint">点任意一天的格子，下面只显示<b>那一天的事项</b>；格子里的柱条是该日'
         '自主任务的完成比例（越短＝越没推进）。改完计划后运行 '
         '<span class="cmd">python app.py replan</span> 重算。</p>'
-        + week_html + '</section>'
+        + week_html
+        + '<div class="wk-panel" id="wk-day">' + week_data["html"] + '</div>'
+        + '</section>'
         '<section class="card"><h2>阶段里程碑</h2>'
         '<p class="hint">一个月 / 90 天 / 一年三道关，逐条打勾；不达标就当场调计划。</p>'
         + "".join(ms) + '</section>'
+        + '<section class="card" id="timetable"><h2>本学期课表 <span class="tag">'
+        + str(len(plan.get("course_meetings", []))) + ' 条安排 · ' + str(credits) + ' 学分</span></h2>'
+        '<p class="hint">周次按教学周；第 1 周自 '
+        + esc(pe.week1_monday(plan).isoformat())
+        + '（周一）起算，当前 2026-09-30 为第 5 教学周。</p>'
+        '<table class="simple">'
+        '<tr><th>星期</th><th>节次</th><th>课程</th><th>教师</th><th>周次</th><th>地点</th></tr>'
+        + "".join(rows) + '</table></section>'
         # 自定义任务：表单较宽，放在左栏最下方才不会被挤成一条
         + render_custom_card(base)
         + '</div>'
@@ -1074,10 +1081,7 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         '<div class="tl-more" id="tl-toggle" onclick="toggleAllTimeline()">展开/收起全部日期</div>'
         '<ul class="tl" id="tl-list">'
         + kd_html + '</ul></section>'
-        + '<section class="card"><h2>本学期课表</h2><table class="simple">'
-        '<tr><th>星期</th><th>节次</th><th>课程</th><th>教师</th><th>周次</th><th>地点</th></tr>'
-        + "".join(rows) + '</table></section>'
-        '<section class="card"><h2>材料库与待补充</h2>'
+        + '<section class="card"><h2>材料库与待补充</h2>'
         '<p class="hint">把新文件丢进 <span class="cmd">materials/</span>，再运行 '
         '<span class="cmd">python app.py replan</span>：材料会被登记并提示需修订的计划项。</p>'
         + watched
@@ -1096,7 +1100,9 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         '<span class="cmd">python app.py serve --port 8765</span><br>'
         '所有赛事时间、保研细则以四川大学教务处与学院当年正式通知为准。</footer>'
         '<script id="bootstrap" type="application/json">' + json.dumps(bootstrap, ensure_ascii=False)
-        + '</script><script>' + JS + '</script></body></html>'
+        + '</script>'
+        '<script id="wk-data" type="application/json">' + wk_data_json + '</script>'
+        '<script>' + JS + '</script></body></html>'
     )
 
     return head + hero + '<div class="grid cols">' + left + right + foot

@@ -38,17 +38,21 @@ check("7 个格子可点、默认只高亮一个",
       and len(re.findall(r'class="wk-cell[^"]*is-sel', html)) == 1,
       f"{html.count('class=\"wk-cell')} / "
       f"{len(re.findall(r'class=.wk-cell[^\"]*is-sel', html))}")
-check("7 天卡片只显示选中那天",
-      html.count('class="wk-day-card') == 7
-      and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', html)) == 6,
-      f"{html.count('class=\"wk-day-card')} / "
-      f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', html))}")
+check("清单区与切换数据都在线上",
+      'id="wk-day"' in html and 'id="wk-data"' in html and "wkSelectDay" in html)
+try:
+    wk_days = json.loads(re.search(r'<script id="wk-data" type="application/json">(.*?)</script>',
+                                   html, re.S).group(1))
+    check("线上日清单数据覆盖 7 天", len(wk_days) == 7, len(wk_days))
+except Exception as exc:  # noqa: BLE001
+    check("线上日清单数据覆盖 7 天", False, str(exc)[:120])
 check("格子下面有具体任务", html.count('class="wk-tt"') >= 20, html.count('class="wk-tt"'))
 check("时间线前 5 项默认展开",
       len(re.findall(r'class="tl-date" data-idx="\d+" open', html)) == 5,
       len(re.findall(r'class="tl-date" data-idx="\d+" open', html)))
 check("右栏已加宽", "1fr 400px" in html)
-check("自定义任务已移到左栏", html.index('id="custom"') < html.index('id="rightcol"'))
+check("课表与自定义任务都在左栏",
+      html.index('id="timetable"') < html.index('id="custom"') < html.index('id="rightcol"'))
 check("材料库分行排版（已入库不竖排）", 'class="mat-name"' in html)
 check("新主题主色已生效", "--primary:#2f5fd0" in html)
 check("五层表面变量在", all(v in html for v in ("--sunken:", "--panel-2:", "--raised:")))

@@ -71,8 +71,8 @@ def main() -> int:
           bool(json.loads(re.search(r'<script id="bootstrap" type="application/json">(.*?)</script>',
                                     html, re.S).group(1))))
 
-    # 本周全景：7 个可点的格子 + 只显示选中那天的清单
-    strip = html.split('class="wk-panel"')[0]
+    # 本周全景：7 个可点的格子 + 点选后切换的清单区
+    strip = html.split('id="wk-day"')[0]
     check("本周全景条带是 7 个格子（不会撑坏 7 列布局）",
           strip.count('class="wk-cell') == 7, str(strip.count('class="wk-cell')))
     check("7 个格子都带 data-day（可点切换）",
@@ -80,13 +80,18 @@ def main() -> int:
     check("默认只有一个格子高亮（is-sel）",
           len(re.findall(r'class="wk-cell[^"]*is-sel', strip)) == 1,
           str(len(re.findall(r'class="wk-cell[^"]*is-sel', strip))))
-    check("7 天各一张卡片，默认只显示 1 张",
-          html.count('class="wk-day-card') == 7
-          and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', html)) == 6,
-          f"{html.count('class=\"wk-day-card')} / "
-          f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', html))}")
-    check("卡片里只有任务列表", html.count('class="wk-items"') == 7)
-    check("切换高亮的 JS 在位", "wkSelectDay" in html and "is-sel" in rd.JS)
+    check("清单区在 #week 卡片内部（点击委托才收得到）",
+          html.index('id="wk-day"') > html.index('id="week"')
+          and html.index('id="wk-day"') < html.index('阶段里程碑'))
+    check("切换所需的三件套齐备：wk-day 容器 / wk-data 数据 / 初次内容",
+          'id="wk-day"' in html and 'id="wk-data"' in html
+          and 'class="wk-day-hd"' in html)
+    check("日清单数据可解析且覆盖 7 天",
+          len(json.loads(re.search(r'<script id="wk-data" type="application/json">(.*?)</script>',
+                                   html, re.S).group(1))) == 7)
+    check("切换函数与点击委托都在",
+          "wkSelectDay" in rd.JS and "closest('.wk-cell')" in rd.JS
+          and "querySelectorAll('.wk-day-card')" not in rd.JS)
     check("本周全景的旧折叠开关已移除", 'id="wk-toggle"' not in html and "toggleWeekDays" not in html)
 
     # 时间线：前 5 项默认展开
@@ -96,9 +101,11 @@ def main() -> int:
 
     # 右栏宽度与窄栏排版
     check("右栏加宽到 400px", "1fr 400px" in rd.CSS)
-    check("自定义任务卡片已移到左栏最下方（week 之后、右栏之前）",
-          html.index('id="custom"') > html.index('id="week"')
-          and html.index('id="custom"') < html.index('id="rightcol"'))
+    check("自定义任务卡片在左栏最下方（课表之后、右栏之前）",
+          html.index('id="timetable"') < html.index('id="custom"') < html.index('id="rightcol"'))
+    check("本学期课表已移到左栏（在自定义任务上方）",
+          html.index('id="timetable"') > html.index('id="week"')
+          and html.index('id="timetable"') < html.index('id="custom"'))
     check("材料库用分行结构（已入库不会竖排）",
           'class="mat-name"' in html and 'class="mat-meta"' in html)
 

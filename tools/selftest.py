@@ -338,9 +338,9 @@ def main() -> int:
         check("每日 Markdown 生成", "今日 todo" in rd.render_day_markdown(plan, day))
 
         # [11a] 本周全景：7 个可点的格子，下面只显示"选中的那一天"（功能一）
-        wk_html, wk_days = rd.render_week_panel(plan, day)
-        check("本周全景只覆盖本周 7 天", wk_days == 7, str(wk_days))
-        strip = wk_html.split('class="wk-panel"')[0]
+        wk_html, wk_data = rd.render_week_panel(plan, day)
+        check("本周全景只覆盖本周 7 天", len(wk_data["days"]) == 7, str(len(wk_data["days"])))
+        strip = wk_html
         check("一周 7 个格子都能点（data-day）",
               strip.count('class="wk-cell') == 7 and strip.count('data-day="') == 7,
               f"{strip.count('class=\"wk-cell')} / {strip.count('data-day=\"')}")
@@ -348,34 +348,31 @@ def main() -> int:
               len(re.findall(r'class="wk-cell[^"]*is-sel', strip)) == 1
               and 'class="wk-cell today is-sel"' in strip,
               str(len(re.findall(r'class=.wk-cell[^\"]*is-sel', strip))))
-        check("每天一张卡片、只显示选中的那天",
-              wk_html.count('class="wk-day-card') == 7
-              and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', wk_html)) == 6,
-              f"{wk_html.count('class=\"wk-day-card')} / "
-              f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', wk_html))}")
-        check("卡片里只有任务列表（不再有课程数/分钟/完成数的标题行）",
-              wk_html.count('class="wk-items"') == 7 and "wk-prog" not in wk_html
-              and "wk-sum" not in wk_html and 'class="chip' not in wk_html)
+        check("切换用的日清单数据齐备（每天一段 HTML）",
+              sorted(wk_data["days"]) == [d.isoformat() for d in
+                                          [day - dt.timedelta(days=day.weekday()) + dt.timedelta(days=i)
+                                           for i in range(7)]]
+              and wk_data["html"] == wk_data["days"][wk_data["selected"]])
+        check("清单里只有任务（不再有课程数/分钟/完成数的标题行）",
+              all("wk-prog" not in v and "wk-sum" not in v and 'class="chip' not in v
+                  for v in wk_data["days"].values()))
         check("旧的整周铺开与跳转标记已清除",
               "data-jump" not in wk_html and "wk-gap" not in wk_html and "wk-toggle" not in wk_html)
-        check("切换高亮由 JS 显式实现（先清后加）",
-              "wkSelectDay" in html and "classList.toggle('is-sel'" in html)
+        check("切换逻辑：容器 + 数据 + 点击委托",
+              "wkSelectDay" in html and "closest('.wk-cell')" in html
+              and 'id="wk-day"' in html and 'id="wk-data"' in html)
+        check("JS 不再引用已改名的 wk-day-card（曾经的 bug 根因）",
+              "wk-day-card" not in rd.JS)
         check("本周全景里有具体任务标题（不是只有格子）",
-              wk_html.count('class="wk-tt"') >= 20, str(wk_html.count('class="wk-tt"')))
-        # 与今日清单同源：今天那一张卡片里的任务要和今日清单对得上
-        wk_today = wk_html.split('id="wk-day-' + day.isoformat() + '"')[1].split("</div></div>")[0]
+              sum(v.count('class="wk-tt"') for v in wk_data["days"].values()) >= 20,
+              str(sum(v.count('class="wk-tt"') for v in wk_data["days"].values())))
+        # 与今日清单同源：今天那一份里的任务要和今日清单对得上
+        wk_today = wk_data["days"][day.isoformat()]
         missing = [t["title"] for t in pe.tasks_for_day(plan, day)
                    if t["title"].split("（")[0][:6] not in wk_today]
         check("本周全景里今天的清单与今日清单同源", not missing, str(missing))
-        # 本周 7 天逐一都有可点卡片（切到任何一天都不会空白）
-        monday = day - dt.timedelta(days=day.weekday())
-        week_ids = [(monday + dt.timedelta(days=i)).isoformat() for i in range(7)]
-        check("本周 7 天都有对应的卡片",
-              all(('id="wk-day-' + x + '"') in wk_html for x in week_ids),
-              str([x for x in week_ids if ('id="wk-day-' + x + '"') not in wk_html]))
-        check("选中今天的卡片里确实有任务（不是空档）",
-              'class="wk-empty"' not in wk_html.split('id="wk-day-' + day.isoformat() + '"')[1]
-              .split("</div></div>")[0])
+        check("选中今天时清单里确实有任务（不是空档）",
+              'class="wk-empty"' not in wk_today)
 
         # 时间线：折叠的单位是"日期"（不是每条说明）
         tl_html, tl_n = rd.render_timeline(plan, day)
@@ -527,6 +524,13 @@ def main() -> int:
         for p in (pe.COMPLETIONS, pe.NOTES, extras):
             if p.exists():
                 p.write_bytes(expected_clean[p])
+        # 服务接口那一节会调用 write_dashboard，把当时还挂着的测试任务（"补体检"）
+        # 写进了真实的 dashboard.html——状态还原后必须重算一次，否则页面会一直带着
+        # 自检的假数据（真的发生过）。
+        try:
+            rd.write_dashboard(pe.load_plan())
+        except Exception as exc:  # noqa: BLE001
+            print("  重算 dashboard.html 失败：" + str(exc))
         shutil.rmtree(tmp, ignore_errors=True)
 
     ok_clean = all(
@@ -536,6 +540,8 @@ def main() -> int:
     check("自检不留残留数据（测试打卡/复盘/临时任务已清理）", ok_clean)
     check("测试用的“补体检”临时任务未残留",
           "补体检" not in extras.read_text(encoding="utf-8"))
+    check("重算后的 dashboard.html 里没有自检的测试数据",
+          "补体检" not in (pe.ROOT / "dashboard.html").read_text(encoding="utf-8"))
 
     print("\n" + "=" * 60)
     print(f"通过 {len(PASS)} 项，失败 {len(FAIL)} 项")
