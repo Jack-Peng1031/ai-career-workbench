@@ -79,7 +79,7 @@ header.hero > *{position:relative;z-index:1}
 .grid{display:grid;gap:18px;margin-top:18px}
 /* align-items:start：两栏各自按内容高度收尾，否则左栏会被右栏的长列表拉高、
    卡片里留出一大片空白（用户反馈过的"左侧大量空白"） */
-@media(min-width:980px){ .cols{grid-template-columns:1fr 340px;align-items:start} }
+@media(min-width:980px){ .cols{grid-template-columns:1fr 400px;align-items:start} }
 .card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px 20px;
   box-shadow:var(--shadow);position:relative;overflow:hidden}
 /* 卡片之间用顶部一条渐隐色带拉出层次：第一张用主色，其余用中性 -->
@@ -102,6 +102,17 @@ header.hero > *{position:relative;z-index:1}
 .kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
 .kv:last-child{border-bottom:0}
 .kv b{font-weight:600}
+/* 右栏的"值"（已入库 / 状态）不允许换行，否则会一个字一行竖着排 */
+.kv > b{flex:0 0 auto;white-space:nowrap;text-align:right}
+.kv > span{flex:1;min-width:0;overflow-wrap:anywhere}
+/* 材料卡片：文件名占一行，路径与状态各占一行，窄栏里也不会挤成竖排 */
+.mat{padding:8px 0;border-bottom:1px dashed var(--line)}
+.mat:last-child{border-bottom:0}
+.mat-name{font-size:12.8px;font-weight:600;overflow-wrap:anywhere}
+.mat-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:3px;
+  font-size:11.8px;color:var(--muted)}
+.mat-meta .st{flex:0 0 auto;white-space:nowrap;font-weight:600;color:var(--ok)}
+.mat-meta .fp{flex:1;min-width:0;overflow-wrap:anywhere}
 ul.tasks{list-style:none;margin:0;padding:0}
 li.task{display:flex;gap:12px;padding:12px 12px 12px 4px;border-top:1px solid var(--line-2);border-radius:9px}
 li.task:hover{background:var(--panel-2)}
@@ -120,8 +131,10 @@ li.task:first-child{border-top:0}
 .ctform textarea{resize:vertical;min-height:38px}
 .ctform .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ctform .row3{display:grid;grid-template-columns:1fr 1fr 92px;gap:8px}
-.ctform .wd{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--ink)}
-.ctform .wd label{display:inline-flex;align-items:center;gap:3px;color:var(--ink);margin:0}
+.ctform .wd{display:flex;flex-wrap:wrap;gap:8px 12px;font-size:12px;color:var(--ink)}
+/* 每个星期几都不可拆行：右栏窄的时候"周六"会被拆成两行（用户反馈过） */
+.ctform .wd label{display:inline-flex;align-items:center;gap:4px;color:var(--ink);margin:0;
+  white-space:nowrap;flex:0 0 auto}
 .btn{border:1px solid var(--line);background:var(--raised);color:var(--ink);border-radius:8px;
   padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .btn.primary{background:linear-gradient(180deg,var(--primary),var(--primary-deep));border-color:var(--primary-deep);
@@ -186,53 +199,45 @@ ul.tl ul.tl-items .ti .sub{display:block;color:var(--muted);font-weight:400;font
 .stat-info{color:var(--primary);background:var(--info-soft);border-color:color-mix(in srgb,var(--primary) 28%,transparent)}
 .stat-alert{color:var(--danger);background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 34%,transparent)}
 
-/* —— 本周全景：一周条带 + 逐日清单 —— */
+/* —— 本周全景：点格子出当天事项 —— */
 .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-.wk-cell{display:block;position:relative;border:1px solid var(--line);border-radius:11px;padding:9px 7px 10px;
+.wk-cell{display:flex;flex-direction:column;gap:2px;align-items:center;position:relative;
+  border:1px solid var(--line);border-radius:11px;padding:9px 7px 10px;
   text-align:center;background:var(--panel);cursor:pointer;text-decoration:none;color:inherit;
   transition:border-color .15s,box-shadow .15s,transform .15s,background .15s}
 .wk-cell:hover{border-color:var(--primary);background:var(--primary-soft);transform:translateY(-1px);
   box-shadow:var(--shadow);text-decoration:none}
 .wk-cell.today{border-color:var(--primary);background:linear-gradient(180deg,var(--primary-soft),var(--panel));
   box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 22%,transparent)}
+/* 选中的格子：厚边框 + 深底色 + 上方一条主色，跟"今天"能同时存在、互不覆盖 */
+.wk-cell.is-sel{border-color:var(--primary-deep);
+  background:linear-gradient(180deg,var(--primary),var(--primary-deep));color:#fff;
+  box-shadow:0 4px 14px -6px color-mix(in srgb,var(--primary) 70%,transparent);transform:translateY(-1px)}
+.wk-cell.is-sel .wk-wd,.wk-cell.is-sel .wk-when{color:rgba(255,255,255,.86)}
+.wk-cell.is-sel:after{content:"";position:absolute;left:22%;right:22%;bottom:-5px;height:3px;
+  border-radius:3px;background:var(--primary-deep)}
 .wk-wd{font-size:11px;color:var(--muted);font-weight:600}
 .wk-cell.today .wk-wd{color:var(--primary)}
+.wk-cell.today.is-sel .wk-wd{color:rgba(255,255,255,.86)}
 .wk-dd{font-weight:700;font-size:15.5px;font-variant-numeric:tabular-nums;line-height:1.25}
 .wk-when{font-size:10px;color:var(--faint)}
 .wk-cnt{font-size:10.5px;color:var(--muted);margin-top:4px;min-height:14px}
-.wk-bar{height:5px;background:var(--sunken);border-radius:99px;margin-top:7px;overflow:hidden}
+.wk-cell.is-sel .wk-cnt{color:rgba(255,255,255,.92)}
+.wk-cell.is-sel .wk-bar{background:rgba(255,255,255,.28)}
+.wk-cell.is-sel .wk-bar i{background:#fff}
+.wk-bar{height:5px;background:var(--sunken);border-radius:99px;margin-top:7px;overflow:hidden;width:100%}
 .wk-bar i{display:block;height:100%;background:var(--ok);border-radius:99px}
-.wk-panel{margin-top:10px}
-/* 每 7 天一个分隔，视觉上把"这一周"与后面的内容分开 */
-.wk-panel > hr.wk-gap{border:0;border-top:2px dashed var(--line);margin:16px 0 12px}
-.wk-panel > hr.wk-gap:first-child{display:none}
-.wk-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
-  font-size:12.5px;color:var(--muted);margin:6px 0 9px}
-.wk-tools .tl-more{padding:0}
-.wk-days{display:grid;gap:8px}
-.wk-day{display:flex;gap:10px;border:1px solid var(--line);border-radius:11px;
-  background:var(--panel-2);padding:9px 12px;scroll-margin-top:14px;transition:border-color .2s,box-shadow .2s}
-.wk-day.hit{border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 20%,transparent)}
-.wk-day.is-today{background:linear-gradient(180deg,var(--primary-soft),var(--panel-2));
-  border-color:color-mix(in srgb,var(--primary) 42%,transparent)}
-.wk-mark{flex:0 0 4px;border-radius:3px;background:var(--line);align-self:stretch}
-.wk-day.is-today .wk-mark{background:var(--primary)}
-.wk-main{flex:1;min-width:0}
-.wk-hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap;cursor:pointer;list-style:none}
-.wk-hd::-webkit-details-marker{display:none}
-.wk-hd::marker{content:""}
-.wk-hd:hover .wk-title{color:var(--primary)}
-.wk-title{font-size:13.2px;font-weight:700;font-variant-numeric:tabular-nums}
-.wk-sum{color:var(--muted);font-size:11.8px}
-.wk-prog{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.wk-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;font-size:11px;color:var(--muted)}
-.chip{border:1px solid var(--line);border-radius:6px;padding:1px 7px;background:var(--panel)}
-.chip.ev{border-color:color-mix(in srgb,var(--extra) 34%,transparent);color:var(--extra);
-  background:color-mix(in srgb,var(--extra) 10%,transparent);font-weight:600}
-.chip.key{border-color:color-mix(in srgb,var(--warn) 34%,transparent);color:var(--warn);
-  background:var(--warn-soft);font-weight:600}
-.wk-rest{color:var(--muted);font-size:12.2px;padding:4px 0 2px}
-.wk-items{list-style:none;margin:9px 0 2px;padding:0}
+/* 选中那一天的事项：只有任务，不再重复日期/课程数/分钟数 */
+.wk-panel{margin-top:14px}
+.wk-day-card{border:1px solid var(--line);border-radius:12px;background:var(--panel-2);
+  padding:10px 14px 12px;scroll-margin-top:14px}
+.wk-day-card[hidden]{display:none}
+.wk-day-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:8px;
+  border-bottom:1px solid var(--line-2);margin-bottom:2px;font-size:12.5px;color:var(--muted)}
+.wk-day-hd .d{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.wk-caret{margin-left:auto;font-weight:600;color:var(--primary);font-size:11.8px}
+.wk-day.is-today{border-color:color-mix(in srgb,var(--primary) 45%,transparent)}
+.wk-items{list-style:none;margin:4px 0 0;padding:0}
 .wk-items > li{display:flex;gap:9px;align-items:flex-start;padding:8px 2px;border-top:1px solid var(--line-2)}
 .wk-items > li:first-child{border-top:0}
 .wk-items > li .bar{align-self:stretch;min-height:18px}
@@ -366,46 +371,39 @@ async function removeCustom(id){
     showOffline('删除失败：' + e.message);
   }
 }
-// —— 本周全景：逐日展开 / 收起（点击某一天的数字也能跳转） ——
-function setWeekText(){
-  const box = document.getElementById('wk-days');
-  const lab = document.getElementById('wk-toggle');
-  if(!box || !lab){ return; }
-  const ds = box.querySelectorAll('details.wk-day');
-  let open = 0;
-  ds.forEach(function(d){ if(d.open){ open += 1; } });
-  lab.textContent = (ds.length && open === ds.length) ? '收起全部日期' : '展开全部日期';
-}
-function toggleWeekDays(mode){
-  const box = document.getElementById('wk-days');
-  if(!box){ return; }
-  const ds = Array.prototype.slice.call(box.querySelectorAll('details.wk-day'));
-  let to = (mode === 'all');
-  if(mode !== 'all' && mode !== 'none'){
-    to = ds.some(function(d){ return !d.open; });
-  }
-  ds.forEach(function(d){ d.open = to; });
-  setWeekText();
-}
-function weekJump(iso){
-  if(!iso){ return; }
-  const el = document.querySelector('#wk-day-' + iso);
-  if(!el){ return; }
-  el.open = true;
-  setWeekText();
+// —— 本周全景：点某个格子 → 下面换成那一天的事项 ——
+// 高亮用"先全部清掉、再给选中的那个加上"来保证一定切换（之前靠 :target/CSS 时点第二次不明显）。
+function wkSelectDay(iso, scroll){
   const card = document.getElementById('week');
-  if(card){ card.scrollIntoView({behavior:'smooth', block:'start'}); }
-  el.classList.add('hit');
-  setTimeout(function(){ el.classList.remove('hit'); }, 1800);
+  if(!card || !iso){ return; }
+  const cells = card.querySelectorAll('.wk-cell');
+  cells.forEach(function(c){
+    const on = (c.getAttribute('data-day') === iso);
+    c.classList.toggle('is-sel', on);
+    if(on){ c.setAttribute('aria-current', 'true'); } else { c.removeAttribute('aria-current'); }
+  });
+  const days = card.querySelectorAll('.wk-day');
+  let hit = null;
+  days.forEach(function(d){
+    const on = (d.getAttribute('data-day') === iso);
+    if(on){ d.removeAttribute('hidden'); hit = d; } else { d.setAttribute('hidden', ''); }
+  });
+  if(hit && scroll){
+    hit.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  if(hit){
+    hit.classList.add('hit');
+    setTimeout(function(){ hit.classList.remove('hit'); }, 1200);
+  }
 }
 (function(){
   const card = document.getElementById('week');
   if(!card){ return; }
-  setWeekText();
   card.addEventListener('click', function(ev){
-    const cell = ev.target.closest('[data-jump]');
-    if(cell){ ev.preventDefault(); weekJump(cell.getAttribute('data-jump')); return; }
-    if(ev.target.closest('#wk-toggle')){ toggleWeekDays(); }
+    const cell = ev.target.closest('.wk-cell');
+    if(!cell){ return; }
+    ev.preventDefault();
+    wkSelectDay(cell.getAttribute('data-day'), true);
   });
 })();
 
@@ -669,13 +667,14 @@ def render_day_card(day: dt.date, week, tasks: list) -> str:
 
 
 def render_timeline(plan: dict, base: dt.date, max_days: int = 16, fold_after: int = 12,
-                    span_days: int = 401) -> tuple[str, int]:
+                    fold_open: int = 5, span_days: int = 401) -> tuple[str, int]:
     """「接下来要盯的日期」：按【日期】折叠的时间线。
 
     折的是"每一天"这一层，不是每条说明：
       · 收起时只看到 `日期 · 星期 · 还有几天 · N 项`，一屏能放下十几天；
       · 点日期行才展开那天要做的事，任务标题占满整行、该换行就换行；
-      · 今天与明天默认展开；超过 fold_after 天的默认不显示，可一键放出。
+      · 前 fold_open 项（默认 5 项）加载时就展开，其余收起；
+        超过 fold_after 天的默认不显示，可一键放出。
     返回 (HTML, 未折叠时的天数)。
     """
     WDC = pe.WEEKDAY_CN
@@ -731,8 +730,8 @@ def render_timeline(plan: dict, base: dt.date, max_days: int = 16, fold_after: i
         d = pe.parse_date(date_s)
         delta = (d - base).days
         when = _when_label(delta)
-        # 今天与明天默认展开
-        opening = " open" if delta <= 1 else ""
+        # 前 fold_open 项默认展开（用户要求：加载时先看到最近的 5 件），其余收起
+        opening = " open" if n < fold_open else ""
         hidden = ' class="tl-hidden"' if n >= fold_after else ''
         items = groups[date_s]
         lis = []
@@ -810,122 +809,88 @@ def render_custom_card(base: dt.date) -> str:
     )
 
 
-def render_week_panel(plan: dict, base: dt.date, span_days: int = 14,
-                      open_days: int = 1) -> tuple[str, int]:
-    """「本周全景」：一周条带 + 下面直接铺开这一周每一天的具体清单。
+def render_week_panel(plan: dict, base: dt.date, span_days: int = 7,
+                      open_days: int = 0, selected: str = "") -> tuple[str, int]:
+    """「本周全景」：7 个可点的格子 + 下面只显示"选中的那一天"的事项。
 
-    以前只画 7 个格子，左栏下面留一大片空白、还得自己去今日清单里一天天翻；
-    现在条带负责"概览"（哪天最重、哪天的完成率低），下面的清单负责"内容"：
-      · 每 7 天一段，段间用虚线分隔，往后多看的几天不会和本周混在一起；
-      · 每一天是一个 <details>，默认展开今天及随后的 open_days 天，其余收起；
-      · 点条带里的日期数字 = 展开那天并滚过去（JS weekJump），不打断阅读。
-    返回 (HTML, 覆盖天数)。
+    交互（用户指定）：点某一天的格子 → 下面立刻换成那一天的任务，格子本身高亮；
+    不再把整周 14 天的清单一次性铺开（那样太长），也不在事项里重复
+    日期/几门课/多少分钟这些格子已经表达过的信息——下面只留任务本身。
+      · 高亮由 JS 显式切换（先清后加），点第二次、来回点都不会失灵；
+      · 7 天的清单都渲染在页面里，切换是纯前端、不联网，静态托管同样可用。
+    返回 (HTML, 天数)。
     """
     first = base - dt.timedelta(days=base.weekday())
-    info = _day_items(plan, first, span_days, with_classes=True)
+    span = max(1, min(span_days, 7))
+    info = _day_items(plan, first, span, with_classes=True)
     dates = sorted(info)
+    sel = selected if selected in info else (
+        base.isoformat() if base.isoformat() in info else dates[0])
 
     def real_items(rec):
         return [t for t in rec["items"] if t["kind"] != "class"]
 
+    # —— 一周 7 个格子 ——
     cells = []
-    # 条带只放"本周"7 天；往后一周只出现在下面的逐日清单里（14 个格子会撑坏 7 列布局）
-    for iso in dates[:7]:
+    for iso in dates:
         rec = info[iso]
         d = rec["date"]
         delta = (d - base).days
-        tasks, real = rec["items"], real_items(rec)
+        real = real_items(rec)
         done = sum(1 for t in real if t.get("done"))
         pct = (done / len(real) * 100) if real else 0
-        courses = len([t for t in tasks if t["kind"] == "class"])
+        courses = len([t for t in rec["items"] if t["kind"] == "class"])
         classes = ["wk-cell"]
         if d == base:
             classes.append("today")
+        if iso == sel:
+            classes.append("is-sel")
+        aria = ' aria-current="true"' if iso == sel else ""
         cells.append(
-            '<a class="' + " ".join(classes) + '" href="#wk-day-' + iso + '" data-jump="' + iso
-            + '" title="' + esc(iso + " 周" + str(d.weekday() + 1) + "　" + str(courses) + " 门课 · "
-                                + str(len(real)) + " 项任务　点击看这一天的清单") + '">'
-            '<div class="wk-wd">' + esc(pe.WEEKDAY_CN[d.weekday()]) + '</div>'
-            '<div class="wk-dd">' + str(d.day) + '</div>'
-            '<div class="wk-when">' + esc(_when_label(delta)) + '</div>'
-            '<div class="wk-cnt">' + str(courses) + ' 课 · ' + str(len(real)) + ' 任务</div>'
-            '<div class="wk-bar"><i style="width:' + f"{pct:.0f}" + '%"></i></div></a>'
+            '<a class="' + " ".join(classes) + '" href="#wk-panel" data-day="' + iso + '"' + aria
+            + ' title="' + esc(iso + "　" + str(courses) + " 门课 · " + str(len(real))
+                               + " 项任务　点击查看这一天的事项") + '">'
+            '<span class="wk-wd">' + esc(pe.WEEKDAY_CN[d.weekday()]) + '</span>'
+            '<span class="wk-dd">' + str(d.day) + '</span>'
+            '<span class="wk-when">' + esc(_when_label(delta)) + '</span>'
+            '<span class="wk-cnt">' + str(courses) + ' 课 · ' + str(len(real)) + ' 任务</span>'
+            '<span class="wk-bar"><i style="width:' + f"{pct:.0f}" + '%"></i></span></a>'
         )
 
-    same_week = [t for iso in dates if (info[iso]["date"] - first).days < 7
-                 for t in real_items(info[iso])]
+    # —— 选中的那一天：只列任务 ——
+    cards = []
+    for iso in dates:
+        rec = info[iso]
+        d = rec["date"]
+        delta = (d - base).days
+        tasks = rec["items"]
+        body = "".join(render_mini_task(t) for t in tasks)
+        if body:
+            body = '<ul class="wk-items">' + body + "</ul>"
+        else:
+            body = '<div class="wk-empty">这一天没有安排。</div>'
+        hint = "今日" if delta == 0 else _when_label(delta)
+        cards.append(
+            '<div class="wk-day-card' + (" is-today" if delta == 0 else "") + '" data-day="' + iso
+            + '" id="wk-day-' + iso + '"' + ("" if iso == sel else " hidden") + '>'
+            '<div class="wk-day-hd"><span class="d">' + esc(iso[5:] + " " + rec["weekday"])
+            + '</span><span class="stat ' + ("stat-today" if delta == 0 else
+                                            ("stat-soon" if 0 < delta <= 3 else "stat-info")) + '">'
+            + esc(hint) + '</span>'
+            '<span class="wk-caret" title="事项已按日期分组，切换请点上面的格子">'
+            + "← 点上面的日期可切换</span></div>" + body + "</div>"
+        )
+
+    same_week = [t for iso in dates for t in real_items(info[iso])]
     week_done = sum(1 for t in same_week if t.get("done"))
     week_min = sum(int(t.get("minutes") or 0) for t in same_week)
-    all_real = [t for iso in dates for t in real_items(info[iso])]
-    all_min = sum(int(t.get("minutes") or 0) for t in all_real)
-
-    blocks, i = [], 0
-    while i < len(dates):
-        chunk = dates[i:i + 7]
-        chunk_first = info[chunk[0]]["date"]
-        parts = []
-        for iso in chunk:
-            rec = info[iso]
-            d = rec["date"]
-            delta = (d - base).days
-            tasks, real = rec["items"], real_items(rec)
-            done = sum(1 for t in real if t.get("done"))
-            courses = [t for t in tasks if t["kind"] == "class"]
-            events = [t for t in tasks if t["kind"] != "class"]
-            events_html = "".join(
-                '<span class="chip ev">' + esc(t["title"]) + "</span>" for t in events[:3]
-            )
-            keyed = [t for t in tasks if t["kind"] == "keydate"]
-            key_html = "".join('<span class="chip key">' + esc(t["title"]) + "</span>"
-                               for t in keyed[:2])
-            chips = events_html + key_html
-            if len(events) > 3:
-                chips += '<span class="chip">还有 ' + str(len(events) - 3) + " 项…</span>"
-            if not tasks:
-                chips = '<span class="chip">空档日：没有课，也没有排任务</span>'
-            body = "".join(render_mini_task(t) for t in tasks)
-            if body:
-                body = '<ul class="wk-items">' + body + "</ul>"
-            # 默认展开"今天及其后 open_days 天"；往前翻到的过去日期不自动展开
-            opening = " open" if 0 <= delta <= open_days else ""
-            hint = "今日" if delta == 0 else _when_label(delta)
-            parts.append(
-                '<details class="wk-day' + (" is-today" if delta == 0 else "") + '" id="wk-day-'
-                + iso + '" data-date="' + iso + '"' + opening + '>'
-                '<summary class="wk-hd">'
-                '<span class="wk-title">' + esc(iso[5:] + " " + info[iso]["weekday"]) + "</span>"
-                '<span class="stat ' + ("stat-today" if delta == 0 else
-                                       ("stat-soon" if 0 < delta <= 3 else "stat-info")) + '">'
-                + esc(hint) + "</span>"
-                '<span class="wk-sum">' + str(len(courses)) + " 门课 · " + str(len(real))
-                + " 项 · " + str(sum(int(t.get("minutes") or 0) for t in real)) + " 分钟</span>"
-                '<span class="wk-prog">完成 ' + str(done) + "/" + str(len(real)) + "</span>"
-                "</summary>" + body + "</details>"
-            )
-        wk_head = ("本周 " + chunk_first.isoformat() + " 起（周一 → 周日）"
-                   if i == 0 else
-                   "往后一周 " + chunk_first.isoformat() + " 起（周一 → 周日）")
-        blocks.append('<hr class="wk-gap"><div class="wk-tools"><span><b>'
-                      + esc(wk_head) + "</b>　" + str(len(chunk)) + " 天</span></div>"
-                      + "".join(parts))
-        i += 7
-
     strip = (
         '<div class="wk">' + "".join(cells) + '</div>'
+        '<p class="hint" style="margin:10px 0 0">点任意一天的格子，下面就会换成那一天的事项。'
+        + '本周 ' + str(len(same_week)) + " 项自主任务，已完成 " + str(week_done) + " 项 · 计划投入 "
+        + str(week_min) + " 分钟（格子里的柱条＝该日完成比例）。</p>"
     )
-
-    tools = (
-        '<div class="wk-tools" style="margin-top:10px">'
-        '<span><b>逐日清单</b>　覆盖 ' + str(len(dates)) + ' 天（本周 + 往后一周）· 共 '
-        + str(len(all_real)) + " 项自主任务 / " + str(all_min) + " 分钟"
-        + '<span class="tag" style="margin-left:8px">默认展开今天起 ' + str(open_days + 1)
-        + ' 天</span></span>'
-        '<span class="tl-more" id="wk-toggle" onclick="toggleWeekDays()">展开全部日期</span></div>'
-        '<p class="hint" style="margin:0 0 4px">点某一天的标题行可折叠/展开；'
-        '点上面的日期数字可直接跳到那一天。本周 ' + str(len(same_week)) + " 项自主任务，已完成 "
-        + str(week_done) + " 项 · 计划投入 " + str(week_min) + " 分钟。</p>"
-    )
-    return strip + tools + '<div class="wk-panel" id="wk-days">' + "".join(blocks) + "</div>", len(dates)
+    return (strip + '<div class="wk-panel" id="wk-panel">' + "".join(cards) + "</div>"), len(dates)
 
 
 def render_day_markdown(plan: dict, day: dt.date) -> str:
@@ -1030,12 +995,16 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
     manifest = pe._load_json(pe.MATERIALS, {})
     files = manifest.get("files", {})
     mat_rows = "".join(
-        '<div class="kv"><span>' + esc(k) + '</span><b>' + str(v["size"]) + ' B</b></div>'
+        '<div class="mat"><div class="mat-name">' + esc(k) + '</div>'
+        '<div class="mat-meta"><span class="fp">' + str(v["size"]) + ' B</span>'
+        '<span class="st">已登记</span></div></div>'
         for k, v in sorted(files.items())
     )
+    # 材料卡片：文件名一行、说明一行、状态单独一行 —— 窄栏里"已入库"不会再竖着排
     watched = "".join(
-        '<div class="kv"><span>' + esc(w["path"]) + '<br><span style="color:var(--muted);font-size:12px">'
-        + esc(w.get("extracted", "")) + '</span></span><b>' + esc(w.get("status", "")) + '</b></div>'
+        '<div class="mat"><div class="mat-name">' + esc(w["path"]) + '</div>'
+        '<div class="mat-meta"><span class="fp">' + esc(w.get("extracted", "")) + '</span>'
+        '<span class="st">' + esc(w.get("status", "")) + '</span></div></div>'
         for w in plan.get("materials", {}).get("watched", [])
     )
     pending = "".join("<li>" + esc(x) + "</li>" for x in plan.get("materials", {}).get("pending_intake", []))
@@ -1072,22 +1041,24 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         '<div class="grid" style="margin:0">'
         + render_day_card(base, week, tasks)
         + '<section class="card" id="week"><h2>本周全景 <span class="tag">'
-        + esc((base - dt.timedelta(days=base.weekday())).isoformat()) + ' 起 · 覆盖 '
-        + str(week_days) + ' 天</span></h2>'
-        '<p class="hint">上面 7 个格子是概览：柱条＝该日自主任务的完成比例，完成度低于 '
-        '50% 会明显偏空；下面直接铺开每一天的清单，不用来回翻。改完计划后运行 '
+        + esc((base - dt.timedelta(days=base.weekday())).isoformat()) + ' 起 · 本周 7 天</span></h2>'
+        '<p class="hint">点任意一天的格子，下面只显示<b>那一天的事项</b>；格子里的柱条是该日'
+        '自主任务的完成比例（越短＝越没推进）。改完计划后运行 '
         '<span class="cmd">python app.py replan</span> 重算。</p>'
         + week_html + '</section>'
         '<section class="card"><h2>阶段里程碑</h2>'
         '<p class="hint">一个月 / 90 天 / 一年三道关，逐条打勾；不达标就当场调计划。</p>'
-        + "".join(ms) + '</section></div>'
+        + "".join(ms) + '</section>'
+        # 自定义任务：表单较宽，放在左栏最下方才不会被挤成一条
+        + render_custom_card(base)
+        + '</div>'
     )
 
     def ratio_txt(w):
         return str(w["done"]) + "/" + str(w["planned"]) + "　" + str(round((w["ratio"] or 0) * 100)) + "%"
 
     right = (
-        '<div class="grid" style="margin:0">'
+        '<div class="grid" id="rightcol" style="margin:0">'
         '<section class="card"><h2>区间完成率</h2><p class="hint">只统计自主任务（课程不计入）。</p>'
         '<div class="kv"><span>近 30 天</span><b>' + ratio_txt(w30) + '</b></div>'
         '<div class="kv"><span>近 90 天</span><b>' + ratio_txt(w90) + '</b></div>'
@@ -1099,10 +1070,10 @@ def render_dashboard(plan: dict, base: dt.date | None = None) -> str:
         + ("".join(prog_rows) or '<p class="hint">暂无带目标的任务。</p>') + '</section>'
         '<section class="card"><h2>接下来要盯的日期'
         '<span class="tag">点日期展开 · 共 ' + str(kd_note) + ' 天</span></h2>'
+        '<p class="hint">默认展开最近 5 项，其余收起。</p>'
         '<div class="tl-more" id="tl-toggle" onclick="toggleAllTimeline()">展开/收起全部日期</div>'
         '<ul class="tl" id="tl-list">'
         + kd_html + '</ul></section>'
-        + render_custom_card(base)
         + '<section class="card"><h2>本学期课表</h2><table class="simple">'
         '<tr><th>星期</th><th>节次</th><th>课程</th><th>教师</th><th>周次</th><th>地点</th></tr>'
         + "".join(rows) + '</table></section>'

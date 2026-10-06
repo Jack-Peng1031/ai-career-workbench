@@ -337,32 +337,45 @@ def main() -> int:
               f"{today_sec.count('class=\"check\"')} vs {len(pe.tasks_for_day(plan, day))}")
         check("每日 Markdown 生成", "今日 todo" in rd.render_day_markdown(plan, day))
 
-        # [11a] 本周全景：条带 + 每一天的具体清单（功能一）
+        # [11a] 本周全景：7 个可点的格子，下面只显示"选中的那一天"（功能一）
         wk_html, wk_days = rd.render_week_panel(plan, day)
-        check("本周全景默认覆盖 14 天（本周 + 往后一周）", wk_days == 14, str(wk_days))
-        check("每一天都是一个可控展开的 details.wk-day",
-              wk_html.count('class="wk-day') == 14 and wk_html.count("<details") == 14,
-              f"{wk_html.count('class=\"wk-day')} / {wk_html.count('<details')}")
-        check("今天与明天默认展开，其余收起",
-              len(re.findall(r'data-date="[0-9-]+" open', wk_html)) == 2,
-              str(len(re.findall(r'data-date="[0-9-]+" open', wk_html))))
-        check("条带 7 个格子都能跳转（data-jump）",
-              wk_html.split('class="wk-panel"')[0].count("data-jump=") == 7,
-              str(wk_html.split('class="wk-panel"')[0].count("data-jump=")))
-        check("每周一段、段间有分隔线", wk_html.count("wk-gap") == 2, str(wk_html.count("wk-gap")))
-        check("本周全景里有展开/收起全部日期的开关",
-              'id="wk-toggle"' in wk_html and "toggleWeekDays" in html)
-        # 关键：条带下面必须真的是"具体清单"，而不是只有 7 个格子
-        check("每一天的清单里有具体任务标题（不是只有格子）",
-              wk_html.count('class="wk-tt"') >= 50, str(wk_html.count('class="wk-tt"')))
-        # 与今日清单同源：今天的每一项都要能在本周全景里找到
-        wk_today = wk_html.split('id="wk-day-' + day.isoformat() + '"')[1].split("</details>")[0]
+        check("本周全景只覆盖本周 7 天", wk_days == 7, str(wk_days))
+        strip = wk_html.split('class="wk-panel"')[0]
+        check("一周 7 个格子都能点（data-day）",
+              strip.count('class="wk-cell') == 7 and strip.count('data-day="') == 7,
+              f"{strip.count('class=\"wk-cell')} / {strip.count('data-day=\"')}")
+        check("默认选中今天，且只有一个格子高亮",
+              len(re.findall(r'class="wk-cell[^"]*is-sel', strip)) == 1
+              and 'class="wk-cell today is-sel"' in strip,
+              str(len(re.findall(r'class=.wk-cell[^\"]*is-sel', strip))))
+        check("每天一张卡片、只显示选中的那天",
+              wk_html.count('class="wk-day-card') == 7
+              and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', wk_html)) == 6,
+              f"{wk_html.count('class=\"wk-day-card')} / "
+              f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', wk_html))}")
+        check("卡片里只有任务列表（不再有课程数/分钟/完成数的标题行）",
+              wk_html.count('class="wk-items"') == 7 and "wk-prog" not in wk_html
+              and "wk-sum" not in wk_html and 'class="chip' not in wk_html)
+        check("旧的整周铺开与跳转标记已清除",
+              "data-jump" not in wk_html and "wk-gap" not in wk_html and "wk-toggle" not in wk_html)
+        check("切换高亮由 JS 显式实现（先清后加）",
+              "wkSelectDay" in html and "classList.toggle('is-sel'" in html)
+        check("本周全景里有具体任务标题（不是只有格子）",
+              wk_html.count('class="wk-tt"') >= 20, str(wk_html.count('class="wk-tt"')))
+        # 与今日清单同源：今天那一张卡片里的任务要和今日清单对得上
+        wk_today = wk_html.split('id="wk-day-' + day.isoformat() + '"')[1].split("</div></div>")[0]
         missing = [t["title"] for t in pe.tasks_for_day(plan, day)
                    if t["title"].split("（")[0][:6] not in wk_today]
         check("本周全景里今天的清单与今日清单同源", not missing, str(missing))
-        # 非教学日（国庆假期）也要照实显示
-        check("假期里的日期同样会铺开清单（不会整段空白）",
-              'id="wk-day-2026-10-07"' in wk_html or 'id="wk-day-2026-10-08"' in wk_html)
+        # 本周 7 天逐一都有可点卡片（切到任何一天都不会空白）
+        monday = day - dt.timedelta(days=day.weekday())
+        week_ids = [(monday + dt.timedelta(days=i)).isoformat() for i in range(7)]
+        check("本周 7 天都有对应的卡片",
+              all(('id="wk-day-' + x + '"') in wk_html for x in week_ids),
+              str([x for x in week_ids if ('id="wk-day-' + x + '"') not in wk_html]))
+        check("选中今天的卡片里确实有任务（不是空档）",
+              'class="wk-empty"' not in wk_html.split('id="wk-day-' + day.isoformat() + '"')[1]
+              .split("</div></div>")[0])
 
         # 时间线：折叠的单位是"日期"（不是每条说明）
         tl_html, tl_n = rd.render_timeline(plan, day)
@@ -388,6 +401,9 @@ def main() -> int:
               'data-idx="0"' in tl_html and tl_html.split('data-idx="0"')[1].split(">")[0].find("open") >= 0
               and tl_html.count(" open>") >= 1,
               str(tl_html[:200]))
+        check("前 5 项日期默认展开、其余收起",
+              tl_html.count(" open>") == 5 and tl_html.count('class="tl-date"') == min(tl_n, 16),
+              f"{tl_html.count(' open>')} 展开 / {tl_html.count('class=\"tl-date\"')} 总数")
         check("同一个日期下多项任务合并成一组（标题都完整保留）",
               all(len(re.findall(r'<span class="ti">', body)) >= 1
                   for body in re.findall(r'<ul class="tl-items">(.*?)</ul>', tl_html, re.S)),
@@ -415,6 +431,14 @@ def main() -> int:
                   ("gpa", "code", "english", "research", "class", "phase", "extra", "custom")))
         check("状态胶囊分三档（完成/临近/常规）",
               all(x in css for x in ("stat-ok", "stat-soon", "stat-info", "stat-today")))
+        check("右栏加宽到 400px 且两栏按内容收尾",
+              "1fr 400px" in css and "align-items:start" in css)
+        check("右栏窄栏防竖排：值不换行 + 星期不可拆",
+              ".kv > b{flex:0 0 auto;white-space:nowrap" in css
+              and ".ctform .wd label" in css and "white-space:nowrap" in
+              css.split(".ctform .wd label")[1].split("}")[0])
+        check("材料卡片改为分行结构（文件名/说明/状态各一行）",
+              ".mat-name" in css and ".mat-meta .st" in css and ".mat-name" in html)
         check("渲染出的轨道标签用上了颜色类",
               html.count("tg tg-") >= 20, str(html.count("tg tg-")))
         check("旧主题的主色残留已清理",

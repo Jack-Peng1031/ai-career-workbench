@@ -71,19 +71,36 @@ def main() -> int:
           bool(json.loads(re.search(r'<script id="bootstrap" type="application/json">(.*?)</script>',
                                     html, re.S).group(1))))
 
-    # 本周全景：条带 7 格 + 逐日清单
+    # 本周全景：7 个可点的格子 + 只显示选中那天的清单
     strip = html.split('class="wk-panel"')[0]
     check("本周全景条带是 7 个格子（不会撑坏 7 列布局）",
           strip.count('class="wk-cell') == 7, str(strip.count('class="wk-cell')))
-    check("条带下面铺开了 14 天的具体清单",
-          html.count('class="wk-day') == 14, str(html.count('class="wk-day')))
-    check("每一天的清单里都有任务标题",
-          html.count('class="wk-tt"') >= 50, str(html.count('class="wk-tt"')))
-    check("今天与明天默认展开",
-          len(re.findall(r'data-date="[0-9-]+" open', html)) == 2,
-          str(len(re.findall(r'data-date="[0-9-]+" open', html))))
-    check("本周全景的展开/收起开关唯一",
-          html.count('id="wk-toggle"') == 1 and "toggleWeekDays" in html)
+    check("7 个格子都带 data-day（可点切换）",
+          strip.count('data-day="') == 7, str(strip.count('data-day="')))
+    check("默认只有一个格子高亮（is-sel）",
+          len(re.findall(r'class="wk-cell[^"]*is-sel', strip)) == 1,
+          str(len(re.findall(r'class="wk-cell[^"]*is-sel', strip))))
+    check("7 天各一张卡片，默认只显示 1 张",
+          html.count('class="wk-day-card') == 7
+          and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', html)) == 6,
+          f"{html.count('class=\"wk-day-card')} / "
+          f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', html))}")
+    check("卡片里只有任务列表", html.count('class="wk-items"') == 7)
+    check("切换高亮的 JS 在位", "wkSelectDay" in html and "is-sel" in rd.JS)
+    check("本周全景的旧折叠开关已移除", 'id="wk-toggle"' not in html and "toggleWeekDays" not in html)
+
+    # 时间线：前 5 项默认展开
+    check("时间线前 5 项默认展开",
+          len(re.findall(r'class="tl-date" data-idx="\d+" open', html)) == 5,
+          str(len(re.findall(r'class="tl-date" data-idx="\d+" open', html))))
+
+    # 右栏宽度与窄栏排版
+    check("右栏加宽到 400px", "1fr 400px" in rd.CSS)
+    check("自定义任务卡片已移到左栏最下方（week 之后、右栏之前）",
+          html.index('id="custom"') > html.index('id="week"')
+          and html.index('id="custom"') < html.index('id="rightcol"'))
+    check("材料库用分行结构（已入库不会竖排）",
+          'class="mat-name"' in html and 'class="mat-meta"' in html)
 
     # 主题：层次与语义色
     check("主题含主色与语义色", all(v in html for v in

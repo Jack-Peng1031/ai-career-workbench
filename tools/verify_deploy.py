@@ -31,18 +31,30 @@ status, body = get("/")
 html = body.decode("utf-8", "replace")
 print(f"首页 HTTP {status}，{len(body)} 字节\n")
 
-check("首页可访问", status == 200 and len(body) > 50000, len(body))
-check("是新版（含「逐日清单」）", "逐日清单" in html)
-check("本周全景逐日清单已渲染（14 个 wk-day）", html.count('class="wk-day') == 14,
-      html.count('class="wk-day'))
-check("每个日期块都有任务标题", html.count('class="wk-tt"') >= 50, html.count('class="wk-tt"'))
+check("首页可访问", status == 200 and len(body) > 40000, len(body))
+check("是新版（本周全景改点选式）", "点任意一天的格子" in html)
+check("7 个格子可点、默认只高亮一个",
+      html.count('class="wk-cell') == 7
+      and len(re.findall(r'class="wk-cell[^"]*is-sel', html)) == 1,
+      f"{html.count('class=\"wk-cell')} / "
+      f"{len(re.findall(r'class=.wk-cell[^\"]*is-sel', html))}")
+check("7 天卡片只显示选中那天",
+      html.count('class="wk-day-card') == 7
+      and len(re.findall(r'class="wk-day-card[^"]*" [^>]*hidden>', html)) == 6,
+      f"{html.count('class=\"wk-day-card')} / "
+      f"{len(re.findall(r'class=.wk-day-card[^\"]*\" [^>]*hidden>', html))}")
+check("格子下面有具体任务", html.count('class="wk-tt"') >= 20, html.count('class="wk-tt"'))
+check("时间线前 5 项默认展开",
+      len(re.findall(r'class="tl-date" data-idx="\d+" open', html)) == 5,
+      len(re.findall(r'class="tl-date" data-idx="\d+" open', html)))
+check("右栏已加宽", "1fr 400px" in html)
+check("自定义任务已移到左栏", html.index('id="custom"') < html.index('id="rightcol"'))
+check("材料库分行排版（已入库不竖排）", 'class="mat-name"' in html)
 check("新主题主色已生效", "--primary:#2f5fd0" in html)
 check("五层表面变量在", all(v in html for v in ("--sunken:", "--panel-2:", "--raised:")))
 check("深色模式两套在", html.count("prefers-color-scheme:dark") >= 2,
       html.count("prefers-color-scheme:dark"))
 check("轨道配色标签已渲染", html.count("tg tg-") >= 20, html.count("tg tg-"))
-check("条带仍是 7 格（列布局正确）",
-      html.split('class="wk-panel"')[0].count('class="wk-cell') == 7)
 check("折叠单位仍是日期（时间线）", 'class="tl-date"' in html)
 check("自定义任务表单在", 'id="ct-form"' in html)
 check("没有乱码", "\ufffd" not in html)
